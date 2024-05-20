@@ -62,6 +62,7 @@ it("create and save a ticket", async () => {
   expect(ticket).toBeDefined();
   expect(ticket!.title).toEqual(data.title);
   expect(ticket!.price).toEqual(data.price);
-});
 
-it("ack the message", async () => {});
+  // expect the ack() method called by 1
+  expect(message.ack).toHaveBeenCalledTimes(1);
+});
