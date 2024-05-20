@@ -44,17 +44,7 @@ const ticketSchema = new mongoose.Schema(
 );
 
 ticketSchema.set('versionKey', 'version');
-// ticketSchema.plugin(updateIfCurrentPlugin);
-
-// use pre save hook to perform save if only there is an existed record with version == this.version -1
-ticketSchema.pre('save', function (done) {
-  // if there is no current version, set it to 
-  this.$where = {
-    version: this.get('version') - 1,
-  };
-  done();
-});
-
+ticketSchema.plugin(updateIfCurrentPlugin);
 
 ticketSchema.statics.build = (attrs: TicketAttrs) => {
   return new Ticket({
