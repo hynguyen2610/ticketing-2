@@ -2,6 +2,7 @@ import { Listener, OrderCreatedEvent, Subjects, BadRequestError } from '@ndhcode
 import { queueGroupName } from './queue-group-name';
 import { Message, Stan } from 'node-nats-streaming';
 import { Ticket } from '../../models/ticket';
+import { TicketUpdatedPublisher } from '../publishers/ticket-updated-publisher';
 
 export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
   subject: Subjects.OrderCreated = Subjects.OrderCreated;
@@ -20,12 +21,19 @@ export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
       throw new BadRequestError('Ticket not found');
     }
 
-    console.log('changing order id to : ', data.id);
-
     // if ticket exist, update the order id in ticket
     ticket.set({ orderId: data.id });
 
     await ticket.save();
+
+    await new TicketUpdatedPublisher(this.client).publish({
+      id: ticket.id,
+      version: ticket.version,
+      title: ticket.title,
+      price: ticket.price,
+      userId: ticket.userId,
+      orderId: data.id
+    });
 
     msg.ack();
   }

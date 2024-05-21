@@ -1,7 +1,7 @@
 import { OrderCreatedListener } from "../order-created-listener";
 import { natsWrapper } from "../../../nats-wrapper";
 import { OrderCreatedEvent } from '../../../../../common/build/events/order-created-event';
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 import { OrderStatus } from '@ndhcode/common';
 import { Message } from 'node-nats-streaming';
 import { Ticket } from "../../../models/ticket";
@@ -70,12 +70,16 @@ it('happy case: order created -> ticket is reserved', async () => {
     await listener.onMessage(data, message);
 
     // expect the ticket has order id now
-    console.log('after update: ', JSON.stringify(ticket));
-
     const reReadTicket = await Ticket.findById(ticket.id);
     expect(reReadTicket!.orderId).toEqual(data.id);
 
     expect(message.ack).toHaveBeenCalledTimes(1);
+
+    // expect published ticket updated event
+    expect(natsWrapper.client.publish).toHaveBeenCalledTimes(1);
+    
+    const tickedUpdatedData = JSON.parse((natsWrapper.client.publish as jest.Mock).mock.calls[0][1]);
+
+    expect(ticket.id).toEqual(tickedUpdatedData.id);
 });
 
-it('error case: order created -> ticket not found', async () => {});
