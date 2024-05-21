@@ -1,28 +1,15 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-exports.__esModule = true;
-var custom_error_1 = require("./custom-error");
-var DatabaseConnectionError = /** @class */ (function (_super) {
-    __extends(DatabaseConnectionError, _super);
-    function DatabaseConnectionError() {
-        var _this = _super.call(this, 'Error connecting to db') || this;
-        _this.statusCode = 500;
-        _this.reason = 'Error connecting to database';
-        Object.setPrototypeOf(_this, DatabaseConnectionError.prototype);
-        return _this;
+Object.defineProperty(exports, "__esModule", { value: true });
+const custom_error_1 = require("./custom-error");
+class DatabaseConnectionError extends custom_error_1.CustomError {
+    constructor() {
+        super('Error connecting to db');
+        this.statusCode = 500;
+        this.reason = 'Error connecting to database';
+        Object.setPrototypeOf(this, DatabaseConnectionError.prototype);
     }
-    DatabaseConnectionError.prototype.serializeErrors = function () {
+    serializeErrors() {
         return [{ message: this.reason }];
-    };
-    return DatabaseConnectionError;
-}(custom_error_1.CustomError));
+    }
+}
 exports.DatabaseConnectionError = DatabaseConnectionError;

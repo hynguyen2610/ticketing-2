@@ -1,33 +1,31 @@
 "use strict";
-exports.__esModule = true;
-var Listener = /** @class */ (function () {
-    function Listener(client) {
+Object.defineProperty(exports, "__esModule", { value: true });
+class Listener {
+    constructor(client) {
         this.ackWait = 5 * 1000;
         this.client = client;
     }
-    Listener.prototype.subscriptionOptions = function () {
+    subscriptionOptions() {
         return this.client
             .subscriptionOptions()
             .setDeliverAllAvailable()
             .setManualAckMode(true)
             .setAckWait(this.ackWait)
             .setDurableName(this.queueGroupName);
-    };
-    Listener.prototype.listen = function () {
-        var _this = this;
-        var subscription = this.client.subscribe(this.subject, this.queueGroupName, this.subscriptionOptions());
-        subscription.on('message', function (msg) {
-            console.log("Message received: " + _this.subject + " / " + _this.queueGroupName);
-            var parsedData = _this.parseMessage(msg);
-            _this.onMessage(parsedData, msg);
+    }
+    listen() {
+        const subscription = this.client.subscribe(this.subject, this.queueGroupName, this.subscriptionOptions());
+        subscription.on('message', (msg) => {
+            console.log(`Message received: ${this.subject} / ${this.queueGroupName}`);
+            const parsedData = this.parseMessage(msg);
+            this.onMessage(parsedData, msg);
         });
-    };
-    Listener.prototype.parseMessage = function (msg) {
-        var data = msg.getData();
+    }
+    parseMessage(msg) {
+        const data = msg.getData();
         return typeof data === 'string'
             ? JSON.parse(data)
             : JSON.parse(data.toString('utf8'));
-    };
-    return Listener;
-}());
+    }
+}
 exports.Listener = Listener;

@@ -1,21 +1,19 @@
 "use strict";
-exports.__esModule = true;
-var Publisher = /** @class */ (function () {
-    function Publisher(client) {
+Object.defineProperty(exports, "__esModule", { value: true });
+class Publisher {
+    constructor(client) {
         this.client = client;
     }
-    Publisher.prototype.publish = function (data) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            _this.client.publish(_this.subject, JSON.stringify(data), function (err) {
+    publish(data) {
+        return new Promise((resolve, reject) => {
+            this.client.publish(this.subject, JSON.stringify(data), (err) => {
                 if (err) {
                     return reject(err);
                 }
-                console.log('Event published to subject', _this.subject);
+                console.log('Event published to subject', this.subject);
                 resolve();
             });
         });
-    };
-    return Publisher;
-}());
+    }
+}
 exports.Publisher = Publisher;

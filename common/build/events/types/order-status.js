@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var OrderStatus;
 (function (OrderStatus) {
     // When the order has been created, but the

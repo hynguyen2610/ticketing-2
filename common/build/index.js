@@ -2,7 +2,7 @@
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./errors/bad-request-error"));
 __export(require("./errors/custom-error"));
 __export(require("./errors/database-connection-error"));
