@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Listener = void 0;
 class Listener {
     constructor(client) {
         this.ackWait = 5 * 1000;

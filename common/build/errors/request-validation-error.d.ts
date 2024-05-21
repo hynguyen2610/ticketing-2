@@ -6,7 +6,7 @@ export declare class RequestValidationError extends CustomError {
     constructor(errors: ValidationError[]);
     serializeErrors(): ({
         message: any;
-        field: any;
+        field: string;
     } | {
         message: any;
         field?: undefined;

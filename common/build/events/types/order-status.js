@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.OrderStatus = void 0;
 var OrderStatus;
 (function (OrderStatus) {
     // When the order has been created, but the
@@ -14,4 +15,4 @@ var OrderStatus;
     // The order has reserved the ticket and the user has
     // provided payment successfully
     OrderStatus["Complete"] = "complete";
-})(OrderStatus = exports.OrderStatus || (exports.OrderStatus = {}));
+})(OrderStatus || (exports.OrderStatus = OrderStatus = {}));
