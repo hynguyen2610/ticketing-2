@@ -1,6 +1,7 @@
-import { requireAuth, validateRequest } from "@ndhcode/common";
+import { BadRequestError, NotAuthorizedError, OrderStatus, requireAuth, validateRequest } from "@ndhcode/common";
 import { body } from "express-validator";
 import express, { Request, Response } from "express";
+import { Order } from "../models/order";
 
 const router = express.Router();
 
@@ -12,7 +13,27 @@ router.post(
     body("orderId").not().isEmpty().withMessage("Order Id is required"),
   ],
   validateRequest,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
+    const { token, orderId } = req.body;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      throw new BadRequestError("Order not found");
+    }
+
+    if (order.userId !== req.currentUser!.id) {
+      throw new NotAuthorizedError();
+    }
+
+    if (order.status == OrderStatus.Cancelled) {
+      throw new BadRequestError("Cannot pay for a cancelled order");
+    }
+
+    if (order.status == OrderStatus.Complete) {
+      throw new BadRequestError("Cannot pay for an order that has already been paid for");
+    }
+
     res.send({ success: true });
   }
 );
