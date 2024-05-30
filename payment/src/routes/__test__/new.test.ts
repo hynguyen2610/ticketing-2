@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import { Order, OrderStatus } from "../../models/order";
 import { app } from "../../app";
 import request from "supertest";
+import { stripeObject } from "../../stripe";
+
+jest.mock('../../stripe.ts');
 
 it("return error when order is completed or cancelled", async () => {
   const userId = 'user1';
@@ -65,4 +68,33 @@ it("Make sure the charge request is created by current user", async () => {
     .set("Cookie", global.signin('hanna'))
     .send({ token: "somethingeverything", orderId: order.id })
     .expect(401);
+});
+
+it('send correct response code in case of success and fail', async() => {
+  const userId = "happy";
+
+  // create an order by that user
+  const order = Order.build({
+    id: new mongoose.Types.ObjectId().toHexString(),
+    price: Math.floor(Math.random() * 10000),
+    status: OrderStatus.Created,
+    version: 0,
+    userId: userId
+  });
+  await order.save();
+
+  await request(app)
+    .post("/api/payment")
+    .set("Cookie", global.signin(userId))
+    .send({ token: "tok_visa", orderId: order.id })
+    .expect(201);
+
+    // console.log('response is: ', response);
+  
+  const chargesOption = (stripeObject.charges.create as jest.Mock).mock.calls[0][0];
+
+  expect (chargesOption.source).toEqual('tok_visa');
+  expect (chargesOption.currency).toEqual('usd');
+  expect (chargesOption.amount).toEqual(order.price * 100);
+
 });

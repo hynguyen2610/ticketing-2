@@ -1,7 +1,14 @@
-import { BadRequestError, NotAuthorizedError, OrderStatus, requireAuth, validateRequest } from "@ndhcode/common";
+import {
+  BadRequestError,
+  NotAuthorizedError,
+  OrderStatus,
+  requireAuth,
+  validateRequest,
+} from "@ndhcode/common";
 import { body } from "express-validator";
 import express, { Request, Response } from "express";
 import { Order } from "../models/order";
+import { stripeObject } from "../stripe";
 
 const router = express.Router();
 
@@ -31,10 +38,18 @@ router.post(
     }
 
     if (order.status == OrderStatus.Complete) {
-      throw new BadRequestError("Cannot pay for an order that has already been paid for");
+      throw new BadRequestError(
+        "Cannot pay for an order that has already been paid for"
+      );
     }
 
-    res.send({ success: true });
+    await stripeObject.charges.create({
+      currency: "usd",
+      amount: order.price * 100,
+      source: token,
+    });
+
+    res.status(201).send({ success: true });
   }
 );
 
