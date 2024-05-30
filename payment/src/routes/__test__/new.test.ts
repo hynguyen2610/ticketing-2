@@ -4,8 +4,6 @@ import { app } from "../../app";
 import request from "supertest";
 import { stripeObject } from "../../stripe";
 
-jest.mock('../../stripe.ts');
-
 it("return error when order is completed or cancelled", async () => {
   const userId = 'user1';
   const cookie = global.signin(userId);
@@ -88,13 +86,13 @@ it('send correct response code in case of success and fail', async() => {
     .set("Cookie", global.signin(userId))
     .send({ token: "tok_visa", orderId: order.id })
     .expect(201);
-
-    // console.log('response is: ', response);
   
-  const chargesOption = (stripeObject.charges.create as jest.Mock).mock.calls[0][0];
+  const stripeCharges = await stripeObject.charges.list({ limit: 30 });
+  const stripeCharge = stripeCharges.data.find(charge => {
+    return charge.amount === order.price * 100
+  });
 
-  expect (chargesOption.source).toEqual('tok_visa');
-  expect (chargesOption.currency).toEqual('usd');
-  expect (chargesOption.amount).toEqual(order.price * 100);
+  expect (stripeCharge!.currency).toEqual('usd');
+  expect (stripeCharge!.amount).toEqual(order.price * 100);
 
 });
