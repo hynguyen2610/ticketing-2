@@ -3,6 +3,7 @@ import { Order, OrderStatus } from "../../models/order";
 import { app } from "../../app";
 import request from "supertest";
 import { stripeObject } from "../../stripe";
+import { Payment } from "../../models/payment";
 
 it("return error when order is completed or cancelled", async () => {
   const userId = 'user1';
@@ -95,4 +96,6 @@ it('send correct response code in case of success and fail', async() => {
   expect (stripeCharge!.currency).toEqual('usd');
   expect (stripeCharge!.amount).toEqual(order.price * 100);
 
+  const payment = await Payment.findOne({ orderId: order.id, stripeId: stripeCharge?.id});
+  expect(payment).not.toBeNull();
 });
