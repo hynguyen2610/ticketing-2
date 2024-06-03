@@ -19,7 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ndhcode/common": "^1.0.28",
+    "@ndhcode/common": "^1.0.30",
     "@types/bull": "^4.10.0",
     "bull": "^4.12.7",
     "node-nats-streaming": "^0.3.2",
