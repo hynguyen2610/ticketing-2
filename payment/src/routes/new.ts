@@ -10,6 +10,8 @@ import express, { Request, Response } from "express";
 import { Order } from "../models/order";
 import { stripeObject } from "../stripe";
 import { Payment } from "../models/payment";
+import { PaymentCreatedPublisher } from "../events/publisher/payment-created-publisher";
+import { natsWrapper } from "../nats-wrapper";
 
 const router = express.Router();
 
@@ -52,11 +54,17 @@ router.post(
 
     const payment = Payment.build({
       orderId,
-      stripeId: charge.id
+      stripeId: charge.id,
     });
     await payment.save();
 
-    res.status(201).send({ success: true });
+    new PaymentCreatedPublisher(natsWrapper.client).publish({
+      id: payment.id,
+      orderId: order.id,
+      stripeId: charge.id,
+    });
+
+    res.status(201).send({ id: payment.id });
   }
 );
 
