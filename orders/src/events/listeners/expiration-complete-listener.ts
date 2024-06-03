@@ -1,4 +1,5 @@
 import {
+  BadRequestError,
   ExpirationCompleteEvent,
   Listener,
   OrderStatus,
@@ -16,7 +17,15 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
   async onMessage(data: ExpirationCompleteEvent["data"], msg: Message) {
     const order = await Order.findById(data.orderId).populate("ticket");
 
-    order?.set({ status: OrderStatus.Cancelled });
+    if (!order) {
+      throw new BadRequestError("Order not found");
+    }
+
+    if (order.status === OrderStatus.Complete) {
+      return msg.ack();
+    }
+
+    order.set({ status: OrderStatus.Cancelled });
 
     await order?.save();
     msg.ack();
