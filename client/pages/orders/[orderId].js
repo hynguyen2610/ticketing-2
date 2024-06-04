@@ -17,19 +17,16 @@ const OrderShow = ({ order, currentUser }) => {
       clearInterval(timerId);
     };
   }, [order]);
-
   if (timeLeft < 0) {
     return <div>Order Expired</div>;
   }
-
-  console.log('pub key env: ', process.env.NEXT_PUBLIC_STRIPE_PUB_KEY);
 
   return (
     <div>
       Time left to pay: {timeLeft} seconds
       <StripeCheckout
         token={(token) => console.log(token)}
-        stripeKey={process.env.NEXT_PUBLIC_STRIPE_PUB_KEY}
+        stripeKey='pk_test_51PKzfgP3zyoINj4w3m7CzP4DMK1J0CIEFGvY4oeqEJ4RE6XakKfmOu13RR7MTPEHFndcmkdtyyNDqcBspIfO0niF00C8E3NpgD'
         amount={order.ticket.price * 100}
         email={currentUser.email}
       />
