@@ -8,7 +8,7 @@ it('clears the cookie after signing out', async () => {
       email: 'test@test.com',
       password: 'password',
     })
-    .expect(400);
+    .expect(201);
 
   const response = await request(app)
     .post('/api/users/signout')
