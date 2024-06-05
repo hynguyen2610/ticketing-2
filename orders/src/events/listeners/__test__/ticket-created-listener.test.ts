@@ -64,5 +64,5 @@ it("create and save a ticket", async () => {
   expect(ticket!.price).toEqual(data.price);
 
   // expect the ack() method called by 1
-  expect(message.ack).toHaveBeenCalledTimes(0);
+  expect(message.ack).toHaveBeenCalledTimes(1);
 });
