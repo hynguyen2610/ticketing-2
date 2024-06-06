@@ -16,5 +16,5 @@ jobs:
         with:
           token: ${{ DIGITALOCEAN_ACCESS_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save digital-ocean-ticketing
-      - run: kubectl apply -f infra/k8s  
+      - run: kubectl apply -f infra/k8s && kubectl apply -f infra/k8s-prod
 
