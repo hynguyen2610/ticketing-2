@@ -15,12 +15,6 @@ spec:
       containers:
         - name: client
           image: bluestorm1288/ticketing-client
-          env:
-            - name: STRIPE_PUB_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: stripe-secret
-                  key: NEXT_PUBLIC_STRIPE_PUB_KEY
 ---
 apiVersion: v1
 kind: Service
