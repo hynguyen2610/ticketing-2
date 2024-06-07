@@ -17,10 +17,21 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker push bluestorm1288/client    
+      - run: docker push bluestorm1288/client
       - uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save digital-ocean-ticketing
-      - run: kubectl rollout restart deployment client-depl   
-
+      - name: Check if deployment exists
+        id: check_deployment
+        run: |
+          if kubectl get deployment client-depl &>/dev/null; then
+            echo "::set-output name=deployment_exists::true"
+          else
+            echo "::set-output name=deployment_exists::false"
+          fi
+      - name: Create deployment if it doesn't exist
+        if: steps.check_deployment.outputs.deployment_exists == 'false'
+        run: kubectl create deployment client-depl --image=bluestorm1288/client
+      - name: Restart deployment
+        run: kubectl rollout restart deployment client-depl
