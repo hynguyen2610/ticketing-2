@@ -26,7 +26,7 @@ const start = async () => {
     process.on("SIGTERM", () => natsWrapper.client.close());
 
     new OrderCreatedListener(natsWrapper.client).listen();
-    console.log('expiration service started');
+    console.log('expiration service started.');
   } catch (err) {
     console.error(err);
   }
