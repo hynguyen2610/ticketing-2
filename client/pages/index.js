@@ -13,7 +13,7 @@ const LandingPage = ({ currentUser, tickets }) => {
 
   return (
     <div>
-      <h1>Tickets</h1>
+      <h1>Tickets list</h1>
       <Link href="/tickets/new">
        Add ticket
       </Link>
