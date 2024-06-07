@@ -34,4 +34,5 @@ jobs:
         if: steps.check_deployment.outputs.deployment_exists == 'false'
         run: kubectl create deployment client-depl --image=bluestorm1288/client
       - name: Restart deployment
+        if: steps.check_deployment.outputs.deployment_exists == 'false'
         run: kubectl rollout restart deployment client-depl
