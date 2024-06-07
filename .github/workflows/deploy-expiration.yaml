@@ -17,10 +17,22 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker push bluestorm1288/expiration    
+      - run: docker push bluestorm1288/expiration
       - uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save digital-ocean-ticketing
-      - run: kubectl rollout restart deployment expiration-depl   
-
+      - name: Check if deployment exists
+        id: check_deployment
+        run: |
+          if kubectl get deployment expiration-depl &>/dev/null; then
+            echo "::set-output name=deployment_exists::true"
+          else
+            echo "::set-output name=deployment_exists::false"
+          fi
+      - name: Create deployment if it doesn't exist
+        if: steps.check_deployment.outputs.deployment_exists == 'false'
+        run: kubectl create deployment expiration-depl --image=bluestorm1288/expiration
+      - name: Restart deployment
+        if: steps.check_deployment.outputs.deployment_exists == 'false'
+        run: kubectl rollout restart deployment expiration-depl
