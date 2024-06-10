@@ -1,0 +1,21 @@
+name: Send Email on PR Event
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Email Notification
+        env:
+          MAILGUN_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+        run: |
+          # Use curl or your preferred tool to send an email via the Mailgun API
+          curl -s --user "api:${secrets.MAILGUN_API_KEY}" \
+               https://api.mailgun.net/v3/YOUR_DOMAIN/messages \
+               -F from='Phong Tran mailgun <beelamda@gmail.com>' \
+               -F to='hynguyen2610@gmail.com' \
+               -F subject='Pull Request Notification' \
+               -F text='A pull request has been ${GITHUB_EVENT_NAME} for ${GITHUB_REPOSITORY}#${{ github.event.pull_request.number }}.'
