@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: bluestorm1288/ticketing-client
+          image: bluestorm1288/ticketing-client:latest
 ---
 apiVersion: v1
 kind: Service

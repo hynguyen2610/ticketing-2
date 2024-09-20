@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: expiration
-          image: bluestorm1288/expiration
+          image: bluestorm1288/ticketing-expiration:latest
           env:
             - name: NATS_CLIENT_ID
               valueFrom:
