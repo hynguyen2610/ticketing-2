@@ -8,7 +8,7 @@ node_modules/
 .env.production.local
 
 # Next.js build output
-/.next/
+**/.next/
 /out/
 
 # TypeScript build output
