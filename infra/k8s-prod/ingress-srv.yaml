@@ -4,16 +4,12 @@ metadata:
   name: ingress-service
   annotations:
     cert-manager.io/issuer: 'letsencrypt-prod'
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/use-regex: 'true'
     nginx.ingress.kubernetes.io/ssl-redirect: 'false'
 spec:
-  tls:
-    - hosts:
-        - www.mytiket.xyz
-      secretName: cert-manager-webhook-ca
+  ingressClassName: nginx
   rules:
-    - host: www.mytiket.xyz
+    - host: ticketing.dev
       http:
         paths:
           - path: /api/users/?(.*)
@@ -24,7 +20,7 @@ spec:
                 port:
                   number: 3000
           - path: /api/tickets/?(.*)
-            pathType: ImplementationSpecific
+            pathType: ImplementationSpecifich
             backend:
               service:
                 name: tickets-srv
