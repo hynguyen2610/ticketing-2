@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: tickets
-          image: bluestorm1288/tickets:latest
+          image: bluestorm1288/ticketing-tickets:latest
           env:
             - name: NATS_CLIENT_ID
               valueFrom:

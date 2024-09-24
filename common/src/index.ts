@@ -21,3 +21,5 @@ export * from './events/order-created-event';
 export * from './events/expiration-complete-event';
 export * from './events/payment-created-event';
 
+export { default as logger } from './logger/logger-wrapper';
+

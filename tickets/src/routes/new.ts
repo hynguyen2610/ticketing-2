@@ -4,6 +4,7 @@ import { requireAuth, validateRequest } from '@ndhcode/common';
 import { Ticket } from '../models/ticket';
 import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
 import { natsWrapper } from '../nats-wrapper';
+import { logger } from '@ndhcode/common/';
 
 const router = express.Router();
 
@@ -18,6 +19,8 @@ router.post(
   ],
   validateRequest,
   async (req: Request, res: Response) => {
+    logger.info('Received a request');
+
     const { title, price } = req.body;
     const ticket = Ticket.build({
       title,
@@ -36,5 +39,9 @@ router.post(
     res.status(201).send(ticket);
   }
 );
+
+router.get('/api/dirname', (req: Request, res: Response) => {
+  res.status(201).send({ dirname: __dirname });
+});
 
 export { router as createTicketRouter };
