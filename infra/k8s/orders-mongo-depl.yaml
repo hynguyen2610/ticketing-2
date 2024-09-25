@@ -15,6 +15,13 @@ spec:
       containers:
         - name: orders-mongo
           image: mongo
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db # MongoDB's default data directory
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: orders-mongo-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -28,3 +35,18 @@ spec:
       protocol: TCP
       port: 27017
       targetPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-mongo-node-port
+spec:
+  type: NodePort # Add this line
+  selector:
+    app: tickets-mongo
+  ports:
+    - name: db
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+      nodePort: 30002
