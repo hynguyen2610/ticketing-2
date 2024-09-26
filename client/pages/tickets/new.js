@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useRequest from '../../hooks/use-request';
+import StyledDropzone from '../../components/image-uploader/styled-dropzone';
 
 const NewTicket = () => {
   const [title, setTitle] = useState('');
@@ -33,7 +34,7 @@ const NewTicket = () => {
   return (
     <div>
       <h1>Create a Ticket</h1>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} encType='multipart/form-data'>
         <div className="form-group">
           <label>Title</label>
           <input
@@ -50,6 +51,16 @@ const NewTicket = () => {
             onChange={(e) => setPrice(e.target.value)}
             className="form-control"
           />
+        </div>
+        <div className='form-group'>
+          <StyledDropzone>
+            {({ getRootProps, getInputProps }) => (
+              <div {...getRootProps()}>
+                <input {...getInputProps()} id='images-array' />
+                <p>Drag 'n' drop some files here, or click to select files</p>
+              </div>
+            )}
+          </StyledDropzone>
         </div>
         {errors}
         <button className="btn btn-primary">Submit</button>
