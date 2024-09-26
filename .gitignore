@@ -44,3 +44,5 @@ ehthumbs.db
 
 # Jest test coverage
 coverage/
+
+common/
