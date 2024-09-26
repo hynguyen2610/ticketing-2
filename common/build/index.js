@@ -13,7 +13,11 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.logger = void 0;
 __exportStar(require("./errors/bad-request-error"), exports);
 __exportStar(require("./errors/custom-error"), exports);
 __exportStar(require("./errors/database-connection-error"), exports);
@@ -34,4 +38,5 @@ __exportStar(require("./events/order-cancelled-event"), exports);
 __exportStar(require("./events/order-created-event"), exports);
 __exportStar(require("./events/expiration-complete-event"), exports);
 __exportStar(require("./events/payment-created-event"), exports);
-__exportStar(require("./logger/logger-wrapper"), exports);
+var logger_wrapper_1 = require("./logger/logger-wrapper");
+Object.defineProperty(exports, "logger", { enumerable: true, get: function () { return __importDefault(logger_wrapper_1).default; } });
