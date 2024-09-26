@@ -16,7 +16,7 @@ node_modules/
 /.typescript/
 
 # Other build files
-build/
+**/build/
 dist/
 
 # Logs

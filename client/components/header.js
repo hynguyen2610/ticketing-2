@@ -2,27 +2,25 @@ import Link from 'next/link';
 
 export default ({ currentUser }) => {
   const links = [
-    !currentUser && { label: 'Sign Up', href: '/auth/signup' },
-    !currentUser && { label: 'Sign In', href: '/auth/signin' },
-    currentUser && { label: 'Sell ticket', href: '/tickets/new' },
-    currentUser && { label: 'My Orders', href: '/orders' },
-    currentUser && { label: 'Sign Out', href: '/auth/signout' },
+    { label: 'Sign Up', href: '/auth/signup', condition: !currentUser },
+    { label: 'Sign In', href: '/auth/signin', condition: !currentUser },
+    { label: 'Sell Ticket', href: '/tickets/new', condition: currentUser },
+    { label: 'My Orders', href: '/orders', condition: currentUser },
+    { label: 'Sign Out', href: '/auth/signout', condition: currentUser },
   ]
-    .filter((linkConfig) => linkConfig)
-    .map(({ label, href }) => {
-      return (
-        <li key={href} className="nav-item">
-          <Link className="nav-link" href={href}>
-            {label}
-          </Link>
-        </li>
-      );
-    });
+    .filter(linkConfig => linkConfig.condition) // Filter based on the condition
+    .map(({ label, href }) => (
+      <li key={href} className="nav-item">
+        <Link className="nav-link" href={href}>
+          {label}
+        </Link>
+      </li>
+    ));
 
   return (
     <nav className="navbar navbar-light bg-light">
       <Link className="navbar-brand" href="/">
-        GitTix
+        What do you desire? {currentUser && currentUser.email}
       </Link>
 
       <div className="d-flex justify-content-end">
