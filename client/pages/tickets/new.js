@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import withAuth from '../../utils/withAuth';
 
 const NewTicket = () => {
   const [title, setTitle] = useState('');
@@ -93,4 +92,4 @@ const NewTicket = () => {
   );
 };
 
-export default withAuth(NewTicket);
+export default NewTicket;
