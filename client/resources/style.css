@@ -1,0 +1,20 @@
+body {
+    background-color: #E3F2FD; /* Light blue pastel */
+    color: #0D47A1; /* Dark blue for text */
+}
+.navbar {
+    background-color: #BBDEFB; /* Medium blue pastel */
+}
+.footer {
+    background-color: #90CAF9; /* Light-medium blue pastel */
+    color: #0D47A1; /* Dark blue for text */
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+.main-content {
+    padding: 20px;
+    margin-bottom: 50px;
+}

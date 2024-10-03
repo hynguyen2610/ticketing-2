@@ -1,5 +1,5 @@
 # Dependency directories
-node_modules/
+**/node_modules/
 
 # Environment variables
 .env.local
@@ -44,3 +44,5 @@ ehthumbs.db
 
 # Jest test coverage
 coverage/
+
+common/
