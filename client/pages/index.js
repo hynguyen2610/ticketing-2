@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 
 const LandingPage = ({ currentUser, tickets }) => {
   const ticketList = tickets.map((ticket) => {

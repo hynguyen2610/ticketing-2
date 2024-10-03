@@ -1,15 +1,18 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import buildClient from '../api/build-client';
-import Header from '../components/header';
+import NewHeader from '../components/new-header';
+import NewFooter from '../components/new-footer';
+import '../resources/style.css';
 
 const AppComponent = ({ Component, pageProps, currentUser }) => {
   return (
-    <div>
-      <Header currentUser={currentUser} />
-      <div className="container">
+    <>
+      <NewHeader currentUser={currentUser} />
+      <div className="main-content container">
         <Component currentUser={currentUser} {...pageProps} />
       </div>
-    </div>
+      <NewFooter />
+    </>
   );
 };
 
