@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { body } from 'express-validator';
 import { requireAuth, validateRequest } from '@ndhcode/common';
 import { Ticket } from '../models/ticket';
@@ -7,73 +7,108 @@ import { natsWrapper } from '../nats-wrapper';
 import { logger } from '@ndhcode/common/';
 import multer from 'multer';
 import fs from 'fs';
+import { format } from 'date-fns';
+import sanitize from 'sanitize-filename';
+import path from 'path';
 
 const router = express.Router();
 
-// Set up multer for file uploads
+
+type MulterFile = Express.Multer.File;
+
+
+const UPLOAD_DIR = './uploads';
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR);
+}
+
+// Set up storage engine for multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = 'uploads/';
-    fs.mkdirSync(dir, { recursive: true }); // Ensure the uploads directory exists
-    cb(null, dir);
+    cb(null, UPLOAD_DIR);
   },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname); // Use the original file name
+  filename: (req, file, callback) => {
+    const now = new Date();
+    const formattedDate =
+      format(now, 'yyyy-MM-dd HH:mm:ss').replace(/ /g, '_') +
+      ':' +
+      String(now.getMilliseconds()).padStart(3, '0');
+    const sanitizedFilename = sanitize(
+      `${formattedDate}${path.extname(file.originalname)}`
+    );
+
+    callback(null, sanitizedFilename);
   },
 });
+
+const fileFilter = (req: any, file: any, cb: any) => {
+  const allowedTypes = /jpeg|jpg|png|gif/; // Define allowed file types
+  const extname = allowedTypes.test(
+    path.extname(file.originalname).toLowerCase()
+  );
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (extname && mimetype) {
+    return cb(null, true);
+  }
+  cb(new Error('Only images are allowed!'));
+};
 
 const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // Limit files to 5MB (optional)
-});
-
-// File upload middleware
-const uploadFiles = upload.array('files'); // Use 'files' as the field name
+  storage: storage,
+  fileFilter: fileFilter,
+}).array('images', 10);
 
 router.post(
   '/api/tickets',
-  requireAuth,
   [
     body('title').not().isEmpty().withMessage('Title is required'),
     body('price')
       .isFloat({ gt: 0 })
       .withMessage('Price must be greater than 0'),
   ],
-  validateRequest,
-  uploadFiles, // Add multer middleware here
-  async (req: Request, res: Response) => {
-    logger.info('Received a request');
+  async (req: Request, res: Response, next: NextFunction) => {
+    upload(req, res, async (err) => {
+      try {
+      logger.info('Received a request');
 
-    // Use type assertion for req.files
-    const uploadedFiles = req.files as Express.Multer.File[] | undefined;
-
-    if (uploadedFiles && uploadedFiles.length > 0) {
-      const fileNames = uploadedFiles.map(file => file.originalname); // Use map to get file names
-      console.log(fileNames); // Logs an array of file names
-    } else {
-      console.log("No file uploaded");
+      // Use type assertion for req.files
+      const { title, price } = req.body;
+      logger.info("req files length: " + req.files?.length)
       
+      const images = req.files ? (req.files as MulterFile[]).map((f : any) => f.filename) : [];
+      // logger.info(`req body: ${req.body}`);
+      logger.info(`Title is: ${title}`);
+      logger.info(`Price is: ${price}`);
+      logger.info(`Images length: ${images.length}`);
+
+      (req.files as MulterFile[]).forEach((img) => {
+        logger.info('Img name: ' + (img as MulterFile).filename);
+        logger.info('Origin name: ' + (img as MulterFile).originalname);
+      });
+      const ticket = Ticket.build({
+        title,
+        price,
+        userId: req.currentUser!.id,
+      });
+
+      await ticket.save();
+
+      new TicketCreatedPublisher(natsWrapper.client).publish({
+        id: ticket.id,
+        title: ticket.title,
+        price: ticket.price,
+        userId: ticket.userId,
+        version: ticket.version,
+      });
+
+      const message = "Ticket has been created!"
+
+      res.status(201).send({ticket, message});
+    } catch(error) {
+      next(error);
     }
-
-    const { title, price } = req.body;
-
-    const ticket = Ticket.build({
-      title,
-      price,
-      userId: req.currentUser!.id,
     });
-
-    await ticket.save();
-
-    new TicketCreatedPublisher(natsWrapper.client).publish({
-      id: ticket.id,
-      title: ticket.title,
-      price: ticket.price,
-      userId: ticket.userId,
-      version: ticket.version,
-    });
-
-    res.status(201).send(ticket);
   }
 );
 
