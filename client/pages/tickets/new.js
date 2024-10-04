@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import buildClient from '../../api/build-client';
 
 const NewTicket = () => {
   const [title, setTitle] = useState('');
@@ -91,5 +92,38 @@ const NewTicket = () => {
     </div>
   );
 };
+
+export async function getServerSideProps(context) {
+  const client = buildClient(context);
+  
+  try {
+    // Check if the user is authenticated
+    const { data } = await client.get('/api/users/currentuser');
+
+    // If the user is not authenticated, redirect to login
+    if (!data.currentUser) {
+      return {
+        redirect: {
+          destination: '/auth/signin',
+          permanent: false,
+        },
+      };
+    }
+
+    // If authenticated, return current user data
+    return {
+      props: {
+        currentUser: data.currentUser,
+      },
+    };
+  } catch (error) {
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    };
+  }
+}
 
 export default NewTicket;
