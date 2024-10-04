@@ -13,9 +13,7 @@ import path from 'path';
 
 const router = express.Router();
 
-
 type MulterFile = Express.Multer.File;
-
 
 const UPLOAD_DIR = './uploads';
 if (!fs.existsSync(UPLOAD_DIR)) {
@@ -61,53 +59,60 @@ const upload = multer({
 
 router.post(
   '/api/tickets',
+  requireAuth,
   [
     body('title').not().isEmpty().withMessage('Title is required'),
     body('price')
       .isFloat({ gt: 0 })
       .withMessage('Price must be greater than 0'),
   ],
+  validateRequest,
   async (req: Request, res: Response, next: NextFunction) => {
     upload(req, res, async (err) => {
       try {
-      logger.info('Received a request');
+        logger.info('Received a request');
 
-      // Use type assertion for req.files
-      const { title, price } = req.body;
-      logger.info("req files length: " + req.files?.length)
-      
-      const images = req.files ? (req.files as MulterFile[]).map((f : any) => f.filename) : [];
-      // logger.info(`req body: ${req.body}`);
-      logger.info(`Title is: ${title}`);
-      logger.info(`Price is: ${price}`);
-      logger.info(`Images length: ${images.length}`);
+        // Use type assertion for req.files
+        const { title, price } = req.body;
+        logger.info('req files length: ' + req.files?.length);
 
-      (req.files as MulterFile[]).forEach((img) => {
-        logger.info('Img name: ' + (img as MulterFile).filename);
-        logger.info('Origin name: ' + (img as MulterFile).originalname);
-      });
-      const ticket = Ticket.build({
-        title,
-        price,
-        userId: req.currentUser!.id,
-      });
+        const images = req.files
+          ? (req.files as MulterFile[]).map((f: any) => f.filename)
+          : [];
+        // logger.info(`req body: ${req.body}`);
+        logger.info(`Title is: ${title}`);
+        logger.info(`Price is: ${price}`);
 
-      await ticket.save();
+        logger.info(`Images length: ${images.length}`);
 
-      new TicketCreatedPublisher(natsWrapper.client).publish({
-        id: ticket.id,
-        title: ticket.title,
-        price: ticket.price,
-        userId: ticket.userId,
-        version: ticket.version,
-      });
+        if (req.files && Array.isArray(req.files)) {
+          (req.files as MulterFile[]).forEach((img) => {
+            logger.info('Img name: ' + (img as MulterFile).filename);
+            logger.info('Origin name: ' + (img as MulterFile).originalname);
+          });
+        }
+        const ticket = Ticket.build({
+          title,
+          price,
+          userId: req.currentUser!.id,
+        });
 
-      const message = "Ticket has been created!"
+        await ticket.save();
 
-      res.status(201).send({ticket, message});
-    } catch(error) {
-      next(error);
-    }
+        new TicketCreatedPublisher(natsWrapper.client).publish({
+          id: ticket.id,
+          title: ticket.title,
+          price: ticket.price,
+          userId: ticket.userId,
+          version: ticket.version,
+        });
+
+        const message = 'Ticket has been created!';
+
+        res.status(201).send({ ticket, message });
+      } catch (error) {
+        next(error);
+      }
     });
   }
 );
