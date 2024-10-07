@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Ticket UI</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #E3F2FD; /* Light blue pastel */
+            color: #0D47A1; /* Dark blue for text */
+        }
+        .navbar {
+            background-color: #BBDEFB; /* Medium blue pastel */
+        }
+        .footer {
+            background-color: #90CAF9; /* Light-medium blue pastel */
+            color: #0D47A1; /* Dark blue for text */
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .main-content {
+            padding: 20px;
+            margin-bottom: 50px;
+        }
+        .ticket-info {
+            margin-bottom: 20px;
+        }
+        .purchase-btn {
+            background-color: #4CAF50; /* Green color */
+            color: white;
+            font-size: 1.2em; /* Bigger text */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .image-grid img {
+            width: 100%;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#">Brand</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Pricing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content container">
+        <h1>Welcome to Our Ticketing Service</h1>
+        
+        <!-- Ticket Display -->
+        <div class="ticket-info">
+            <div>
+                <label>Title:</label>
+                <h2>Concert Ticket</h2>
+            </div>
+            <div>
+                <label>Price:</label>
+                <span>$50.00</span>
+            </div>
+            <button class="purchase-btn">Purchase</button>
+        </div>
+        
+        <!-- Optional Images -->
+        <div class="image-grid">
+            <img src="https://via.placeholder.com/150" alt="Image 1">
+            <img src="https://via.placeholder.com/150" alt="Image 2">
+            <img src="https://via.placeholder.com/150" alt="Image 3">
+            <img src="https://via.placeholder.com/150" alt="Image 4">
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <span>&copy; 2023 Your Company</span>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
