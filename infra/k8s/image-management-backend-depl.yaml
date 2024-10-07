@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-management-backend-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-management-backend
+  template:
+    metadata:
+      labels:
+        app: image-management-backend
+    spec:
+      containers:
+        - name: image-management-backend
+          image: bluestorm1288/image-management-backend:latest
+          env:
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: 'http://nats-srv:4222'
+            - name: NATS_CLUSTER_ID
+              value: ticketing
+            - name: MONGO_URI
+              value: 'mongodb://image-management-mongo-srv:27017/image-management-backend'
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_KEY
+          volumeMounts:
+            - name: upload-storage
+              mountPath: /uploads
+      volumes:
+        - name: upload-storage
+          persistentVolumeClaim:
+            claimName: upload-storage-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-management-backend-srv
+spec:
+  selector:
+    app: image-management-backend
+  ports:
+    - name: image-management-backend
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

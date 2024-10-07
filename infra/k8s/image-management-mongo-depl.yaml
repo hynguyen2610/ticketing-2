@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-management-mongo-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-management-mongo
+  template:
+    metadata:
+      labels:
+        app: image-management-mongo
+    spec:
+      containers:
+        - name: image-management-mongo
+          image: mongo
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db # MongoDB's default data directory
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: image-managements-mongo-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-management-mongo-srv
+spec:
+  selector:
+    app: image-management-mongo
+  ports:
+    - name: db
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-management-mongo-lb
+spec:
+  type: LoadBalancer # Add this line
+  selector:
+    app: image-management-mongo
+  ports:
+    - name: db
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
