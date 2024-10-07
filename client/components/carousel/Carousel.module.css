@@ -1,0 +1,12 @@
+.carousel-item img {
+    max-height: 100px;
+    width: auto;
+    display: block;
+    margin: auto;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
