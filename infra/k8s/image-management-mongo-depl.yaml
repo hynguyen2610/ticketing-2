@@ -21,7 +21,7 @@ spec:
       volumes:
         - name: mongo-data
           persistentVolumeClaim:
-            claimName: image-managements-mongo-pvc
+            claimName: image-management-mongo-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -39,9 +39,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: image-management-mongo-lb
+  name: image-management-mongo-node-port
 spec:
-  type: LoadBalancer # Add this line
+  type: NodePort # Add this line
   selector:
     app: image-management-mongo
   ports:

@@ -39,6 +39,13 @@ spec:
                 name: payment-srv
                 port:
                   number: 3000
+          - path: /api/images/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: image-management-backend-srv
+                port:
+                  number: 3000
           - path: /?(.*)
             pathType: ImplementationSpecific
             backend:
