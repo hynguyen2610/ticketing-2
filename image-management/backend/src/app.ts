@@ -4,8 +4,13 @@ import { json } from 'body-parser';
 import cookieSession from 'cookie-session';
 import { errorHandler, NotFoundError, currentUser } from '@ndhcode/common';
 import { indexImagesRouter } from './routes';
+import cors from 'cors';
+
 
 const app = express();
+
+app.use(cors());
+
 app.set('trust proxy', true);
 app.use(json());
 app.use(
