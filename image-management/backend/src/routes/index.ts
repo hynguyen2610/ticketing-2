@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import { requireAuth } from '@ndhcode/common';
 import { Image } from '../models/image';
 
 const router = express.Router();

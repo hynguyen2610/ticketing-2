@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { requireAuth, validateRequest } from '@ndhcode/common';
+import { requireAuth, Subjects, TicketCreatedEvent, validateRequest } from '@ndhcode/common';
 import { Ticket } from '../models/ticket';
 import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
 import { natsWrapper } from '../nats-wrapper';
@@ -94,13 +94,19 @@ router.post(
 
     await ticket.save();
 
-    new TicketCreatedPublisher(natsWrapper.client).publish({
-      id: ticket.id,
-      title: ticket.title,
-      price: ticket.price,
-      userId: ticket.userId,
-      version: ticket.version,
-    });
+    const ticketCreatedEvent: TicketCreatedEvent = {
+      subject: Subjects.TicketCreated,
+      data: {
+        id: ticket.id,
+        title: ticket.title,
+        price: ticket.price,
+        userId: ticket.userId,
+        version: ticket.version,
+        images: ticket.images || []
+      }
+    };
+    
+    new TicketCreatedPublisher(natsWrapper.client).publish(ticketCreatedEvent.data);
 
     const message = 'Ticket has been created!';
 
