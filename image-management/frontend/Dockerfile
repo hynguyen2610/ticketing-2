@@ -1,12 +1,12 @@
-FROM node:alpine
-
-RUN apk add --no-cache curl
+FROM node:18
 
 WORKDIR /app
 COPY package.json .
 COPY package-lock.json .
 
-RUN npm install --omit=dev
+RUN yarn install
 COPY . .
 
-CMD ["npm", "start"]
+EXPOSE 3000
+
+CMD ["yarn", "start"]
