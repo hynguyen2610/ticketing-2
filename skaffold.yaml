@@ -67,3 +67,13 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: bluestorm1288/image-management-fronend
+      context: image-management/frontend
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+          - src: 'src/**/*.html'
+            dest: .

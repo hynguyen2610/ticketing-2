@@ -8,6 +8,16 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
+    - host: iman.dev
+      http:
+        paths:
+          - path: /im
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: image-management-frontend-srv
+                port:
+                  number: 3000
     - host: ticketing.dev
       http:
         paths:
@@ -50,7 +60,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: image-management-frontend-srv
+                name: client-srv
                 port:
                   number: 3000
           - path: /?(.*)
