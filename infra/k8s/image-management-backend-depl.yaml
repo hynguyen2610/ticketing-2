@@ -33,7 +33,7 @@ spec:
                   key: JWT_KEY
           volumeMounts:
             - name: upload-storage
-              mountPath: /uploads
+              mountPath: /app/uploads
       volumes:
         - name: upload-storage
           persistentVolumeClaim:

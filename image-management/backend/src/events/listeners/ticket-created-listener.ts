@@ -19,15 +19,15 @@ export class TicketCreatedListener extends Listener<TicketCreatedEvent> {
 
   async onMessage(data: TicketCreatedEvent['data'], msg: Message) {
     const { images, id } = data;
-    console.log("Image management received ticket created");
+    console.log('Image management received ticket created');
 
     if (images) {
-      console.log("Image management started saving");
+      console.log('Image management started saving');
       const savePromises = images.map(async (filename) => {
         const image = Image.build({
           filename: filename,
-          published_status: ImageStatus.Created,
-          published_url: undefined,
+          publishedStatus: ImageStatus.Created,
+          publishedUrl: undefined,
           ticketId: id,
         });
 
@@ -35,7 +35,7 @@ export class TicketCreatedListener extends Listener<TicketCreatedEvent> {
       });
 
       await Promise.all(savePromises);
-      console.log("Image management finished saving");
+      console.log('Image management finished saving');
     }
 
     msg.ack();

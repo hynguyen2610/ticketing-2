@@ -4,16 +4,16 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 interface ImageAttrs {
   filename: string;
-  published_url: string | undefined;
-  published_status: ImageStatus;
+  publishedUrl: string | undefined;
+  publishedStatus: ImageStatus;
   ticketId: string;
 }
 
 export interface ImageDoc extends mongoose.Document {
   filename: string;
-  published_url: string | undefined;
+  publishedUrl: string | undefined;
   version: number;
-  published_status: ImageStatus;
+  publishedStatus: ImageStatus;
   ticketId: string;
 }
 
@@ -28,7 +28,7 @@ const ImageSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    published_url: {
+    publishedUrl: {
       type: String,
       required: false,
     },

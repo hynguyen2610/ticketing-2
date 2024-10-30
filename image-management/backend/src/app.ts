@@ -5,6 +5,7 @@ import cookieSession from 'cookie-session';
 import { errorHandler, NotFoundError, currentUser } from '@ndhcode/common';
 import { indexImagesRouter } from './routes';
 import cors from 'cors';
+import { publishImagesRouter } from './routes/publish';
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(
 app.use(currentUser);
 
 app.use(indexImagesRouter);
+app.use(publishImagesRouter);
 
 app.all('*', async (req, res) => {
   throw new NotFoundError();

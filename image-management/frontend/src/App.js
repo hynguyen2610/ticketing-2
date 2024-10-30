@@ -18,9 +18,20 @@ function App() {
     fetchImages();
   }, []);
 
-  const handlePublish = (id) => {
-    // Implement publish logic here
-    console.log(`Publishing image with ID: ${id}`);
+  const handlePublish = async (id) => {
+    try {
+      const response = await fetch(`https://ticketing.dev/api/images/${id}/publish`,
+        { method: 'PUT', });
+      if (response.ok) {
+        console.log(`Successfully published image with ID: ${id}`);
+      }
+      else {
+        console.error('Failed to publish the image:', response.statusText);
+      }
+    }
+    catch (error) {
+      console.error('Error publishing the image:', error);
+    }
   };
 
   return (
@@ -40,10 +51,10 @@ function App() {
           {images.map((image) => (
             <tr key={image.id}>
               <td>{image.id}</td>
-              <td>{image.filename}</td>
+              <td><a href={`/uploads/${image.filename}`} target="_blank" rel="noopener noreferrer">{image.filename}</a></td>
               <td>{image.publishedStatus}</td>
               <td>
-                {image.publishedStatus === 'Published' ? (
+                {image.publishedStatus === 'published' ? (
                   <a href={image.publishedUrl} target="_blank" rel="noopener noreferrer">
                     {image.publishedUrl}
                   </a>
@@ -52,9 +63,9 @@ function App() {
                 )}
               </td>
               <td>
-                {image.publishedStatus !== 'Published' && (
-                  <Button 
-                    variant="primary" 
+                {image.publishedStatus !== 'published' && (
+                  <Button
+                    variant="primary"
                     onClick={() => handlePublish(image.id)}
                   >
                     Publish
