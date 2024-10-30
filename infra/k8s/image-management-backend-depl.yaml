@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tickets-depl
+  name: image-management-backend-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tickets
+      app: image-management-backend
   template:
     metadata:
       labels:
-        app: tickets
+        app: image-management-backend
     spec:
       containers:
-        - name: tickets
-          image: bluestorm1288/ticketing-tickets:latest
+        - name: image-management-backend
+          image: bluestorm1288/image-management-backend:latest
           env:
             - name: NATS_CLIENT_ID
               valueFrom:
@@ -25,7 +25,7 @@ spec:
             - name: NATS_CLUSTER_ID
               value: ticketing
             - name: MONGO_URI
-              value: 'mongodb://tickets-mongo-srv:27017/tickets'
+              value: 'mongodb://image-management-mongo-srv:27017/image-management-backend'
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:
@@ -33,7 +33,7 @@ spec:
                   key: JWT_KEY
           volumeMounts:
             - name: upload-storage
-              mountPath: /uploads
+              mountPath: /app/uploads
       volumes:
         - name: upload-storage
           persistentVolumeClaim:
@@ -42,26 +42,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tickets-srv
+  name: image-management-backend-srv
 spec:
   selector:
-    app: tickets
+    app: image-management-backend
   ports:
-    - name: tickets
+    - name: image-management-backend
       protocol: TCP
       port: 3000
-      targetPort: 3000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: tickets-srv-nodeport
-spec:
-  type: NodePort
-  selector:
-    app: tickets
-  ports:
-    - name: tickets
-      protocol: TCP
-      port: 6000
       targetPort: 3000

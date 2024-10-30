@@ -59,3 +59,19 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: bluestorm1288/image-management-backend
+      context: image-management/backend
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    - image: bluestorm1288/iman-front
+      context: image-management/frontend
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.js'
+            dest: .
