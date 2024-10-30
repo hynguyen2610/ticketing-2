@@ -14,13 +14,10 @@ spec:
     spec:
       containers:
         - name: image-management-frontend
-          image: bluestorm1288/image-management-frontend:latest
-          imagePullPolicy: Always
+          image: bluestorm1288/iman-front:latest
           volumeMounts:
             - name: upload-storage
               mountPath: /app/public/uploads
-          ports:
-            - containerPorts: 3000
       volumes:
         - name: upload-storage
           persistentVolumeClaim:
@@ -37,19 +34,6 @@ spec:
     - name: image-management-frontend
       protocol: TCP
       port: 3000
-      targetPort: 3000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: image-management-frontend-ss
-spec:
-  selector:
-    app: image-management-frontend
-  ports:
-    - name: image-management-frontend-ss
-      protocol: TCP
-      port: 3100
       targetPort: 3000
 ---
 apiVersion: v1
