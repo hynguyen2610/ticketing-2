@@ -28,7 +28,11 @@ const TicketShow = ({ ticket }) => {
       <div className="row mt-4">
         {ticket.images.map((image, index) => (
           <div className="col-md-4 mb-4" key={image}>
-            <img src={`/uploads/${image}`} className="img-fluid" alt={`Ticket Image ${index + 1}`} />
+            <img
+              src={image.startsWith('https://') ? image : `/uploads/${image}`}
+              className="img-fluid"
+              alt={`Ticket Image ${index + 1}`}
+            />
           </div>
         ))}
       </div>

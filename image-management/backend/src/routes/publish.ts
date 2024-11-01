@@ -4,6 +4,8 @@ import { ImageStatus } from '@ndhcode/common';
 import path from 'path';
 import fs from 'fs';
 import axios from 'axios';
+import { ImagePublishedPublisher } from '../events/publishers/image-published-publisher';
+import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
 
@@ -13,8 +15,7 @@ router.put('/api/images/:id/publish', async (req: Request, res: Response) => {
   if (!image) {
     res.status(404).send(`Image with id ${req.params.id} not found`);
   } else {
-    // Read the image file (assuming the image has a file path stored)
-    const imagePath = path.resolve('uploads', image.filename); // Adjust this path accordingly
+    const imagePath = path.resolve('uploads', image.filename);
 
     // Read the image file as a Buffer
     const imageFile = fs.readFileSync(imagePath);
@@ -23,15 +24,15 @@ router.put('/api/images/:id/publish', async (req: Request, res: Response) => {
     const imgurResponse = await axios.post(
       'https://api.imgur.com/3/image',
       {
-        image: imageFile.toString('base64'), // Convert the image to base64
-        type: 'base64', // Indicate that the image is in base64 format
-        title: 'Simple upload', // Optional title
-        description: 'This is a simple image upload in Imgur', // Optional description
+        image: imageFile.toString('base64'),
+        type: 'base64',
+        title: 'Simple upload',
+        description: 'This is a simple image upload in Imgur',
       },
       {
         headers: {
-          Authorization: `Client-ID 540bf5523da745f`, // Replace with your Imgur client ID
-          'Content-Type': 'application/json', // Set content type to JSON
+          Authorization: `Client-ID 540bf5523da745f`,
+          'Content-Type': 'application/json',
         },
       }
     );
@@ -45,6 +46,15 @@ router.put('/api/images/:id/publish', async (req: Request, res: Response) => {
     });
 
     await image.save();
+
+    new ImagePublishedPublisher(natsWrapper.client).publish({
+      id: image.id,
+      version: image.version,
+      ticketId: image.ticketId,
+      publishedStatus: image.publishedStatus,
+      publishedUrl: image.publishedUrl!,
+      filename: image.filename
+    });
   }
 
   res.send(image);
