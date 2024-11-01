@@ -7,6 +7,7 @@ import { deleteOrderRouter } from './routes/delete';
 import { indexOrderRouter } from './routes/index';
 import { newOrderRouter } from './routes/new';
 import { showOrderRouter } from './routes/show';
+import { indexTicketRouter } from './routes/tickets';
 
 const app = express();
 app.set('trust proxy', true);
@@ -20,6 +21,7 @@ app.use(
 app.use(currentUser);
 
 app.use(deleteOrderRouter);
+app.use(indexTicketRouter);
 app.use(indexOrderRouter);
 app.use(newOrderRouter);
 app.use(showOrderRouter);
