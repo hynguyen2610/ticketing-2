@@ -44,6 +44,7 @@ function App() {
             <th>Filename</th>
             <th>Published Status</th>
             <th>Published URL</th>
+            <th>Ticket id</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -61,6 +62,9 @@ function App() {
                 ) : (
                   'N/A'
                 )}
+              </td>
+              <td>
+                {image.ticketId}
               </td>
               <td>
                 {image.publishedStatus !== 'published' && (
