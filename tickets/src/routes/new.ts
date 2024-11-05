@@ -10,14 +10,19 @@ import fs from 'fs';
 import { format } from 'date-fns';
 import sanitize from 'sanitize-filename';
 import path from 'path';
+import os from 'os';
 
 const router = express.Router();
 
 type MulterFile = Express.Multer.File;
 
-const UPLOAD_DIR = '/uploads';
+const isK8s = process.env.K8S_ENV === 'true'; // Set this environment variable in your K8s deployment
+const UPLOAD_DIR = isK8s ? '/app/uploads' : path.join(os.tmpdir(), 'uploads'); // Use temp directory for local testing
+
+console.log('upload dir:' + UPLOAD_DIR);
+
 if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR);
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
 // Set up storage engine for multer

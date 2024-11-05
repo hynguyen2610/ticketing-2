@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev --poll src/index.ts",
-    "test": "jest --watchAll --no-cache",
+    "test": "K8S_ENV=false jest --watchAll --no-cache",
     "test:ci": "jest",
     "testListener": "jest --watchAll --no-cache --testPathPattern=src/events/listeners/__test__"
   },
@@ -32,6 +32,7 @@
     "express-async-errors": "^3.1.1",
     "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.0",
+    "migrate": "^2.1.0",
     "mongoose": "^7.1.0",
     "mongoose-update-if-current": "^1.4.0",
     "multer": "^1.4.5-lts.1",

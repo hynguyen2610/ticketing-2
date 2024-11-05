@@ -31,9 +31,11 @@ spec:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_KEY
+            - name: K8S_ENV
+              value: 'true'
           volumeMounts:
             - name: upload-storage
-              mountPath: /uploads
+              mountPath: /app/uploads
       volumes:
         - name: upload-storage
           persistentVolumeClaim:

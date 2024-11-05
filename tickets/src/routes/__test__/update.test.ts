@@ -39,7 +39,7 @@ it("returns a 401 if the user does not own the ticket", async () => {
     });
 
   await request(app)
-    .put(`/api/tickets/${response.body.id}`)
+    .put(`/api/tickets/${response.body.ticket.id}`)
     .set("Cookie", global.signin())
     .send({
       title: "alskdjflskjdf",
@@ -60,7 +60,7 @@ it("returns a 400 if the user provides an invalid title or price", async () => {
     });
 
   await request(app)
-    .put(`/api/tickets/${response.body.id}`)
+    .put(`/api/tickets/${response.body.ticket.id}`)
     .set("Cookie", cookie)
     .send({
       title: "",
@@ -69,7 +69,7 @@ it("returns a 400 if the user provides an invalid title or price", async () => {
     .expect(400);
 
   await request(app)
-    .put(`/api/tickets/${response.body.id}`)
+    .put(`/api/tickets/${response.body.ticket.id}`)
     .set("Cookie", cookie)
     .send({
       title: "alskdfjj",
@@ -90,7 +90,7 @@ it("updates the ticket provided valid inputs", async () => {
     });
 
   await request(app)
-    .put(`/api/tickets/${response.body.id}`)
+    .put(`/api/tickets/${response.body.ticket.id}`)
     .set("Cookie", cookie)
     .send({
       title: "new title",
@@ -99,8 +99,7 @@ it("updates the ticket provided valid inputs", async () => {
     .expect(200);
 
   const ticketResponse = await request(app)
-    .get(`/api/tickets/${response.body.id}`)
-    .send();
+    .get(`/api/tickets/${response.body.ticket.id}`).send();
 
   expect(ticketResponse.body.title).toEqual("new title");
   expect(ticketResponse.body.price).toEqual(100);
@@ -118,7 +117,7 @@ it("publishes an event", async () => {
     });
 
   await request(app)
-    .put(`/api/tickets/${response.body.id}`)
+    .put(`/api/tickets/${response.body.ticket.id}`)
     .set("Cookie", cookie)
     .send({
       title: "new title",
@@ -144,7 +143,7 @@ it("reject updating request if the ticket is reserved", async () => {
 
   // Update the ticket first time to set the order it -> success
   await request(app)
-    .put(`/api/tickets/${ticketResponse.body.id}`)
+    .put(`/api/tickets/${ticketResponse.body.ticket.id}`)
     .set("Cookie", cookie)
     .send({
       title: "new title",
@@ -155,9 +154,8 @@ it("reject updating request if the ticket is reserved", async () => {
   expect(natsWrapper.client.publish).toHaveBeenCalled();
 
   // Try to update the ticket the second time -> rejectedawait request(app)
-  let errorMessage;
-  const response = await request(app)
-    .put(`/api/tickets/${ticketResponse.body.id}`)
+  await request(app)
+    .put(`/api/tickets/${ticketResponse.body.ticket.id}`)
     .set("Cookie", cookie)
     .send({
       title: "new title 2",
@@ -166,7 +164,7 @@ it("reject updating request if the ticket is reserved", async () => {
     })
     .expect(400);
   
-    const ticketFromDB = await Ticket.findById(ticketResponse.body.id);
+    const ticketFromDB = await Ticket.findById(ticketResponse.body.ticket.id);
 
     expect(ticketFromDB?.title).toEqual('new title');
     expect(ticketFromDB?.price).toEqual(100);
