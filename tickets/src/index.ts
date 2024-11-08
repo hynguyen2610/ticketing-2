@@ -5,6 +5,7 @@ import { natsWrapper } from './nats-wrapper';
 import { OrderCreatedListener } from './events/listeners/order-created-listener';
 import { OrderCancelledListener } from './events/listeners/order-cancelled-listener';
 import { ImagePublishedListener } from './events/listeners/image-published-listener';
+import MigrationRunner from './migration_runner';
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -22,6 +23,23 @@ const start = async () => {
   if (!process.env.NATS_CLUSTER_ID) {
     throw new Error('NATS_CLUSTER_ID must be defined');
   }
+
+  // Function to run migrations
+  const runMigrations = async () => {
+    try {
+      console.log('Running migrations...');
+      const migrationRunner = new MigrationRunner();
+      await migrationRunner.runAllMigrations(); // Runs all migrations
+      console.log('Migrations applied successfully.');
+    } catch (error) {
+      console.error('Error running migrations:', error);
+      process.exit(1); // Exit if migrations fail
+    }
+  };
+
+  (async () => {
+    await runMigrations(); // Run migrations before starting the server
+  })();
 
   try {
     await natsWrapper.connect(
