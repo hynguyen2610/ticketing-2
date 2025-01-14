@@ -37,9 +37,9 @@ const start = async () => {
     }
   };
 
-  (async () => {
-    await runMigrations(); // Run migrations before starting the server
-  })();
+  // (async () => {
+  //   await runMigrations(); // Run migrations before starting the server
+  // })();
 
   try {
     await natsWrapper.connect(
