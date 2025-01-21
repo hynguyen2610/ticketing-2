@@ -40,6 +40,7 @@ metadata:
   labels:
     app: jaeger
 spec:
+  type: NodePort
   ports:
     - name: query
       port: 16686
@@ -71,6 +72,7 @@ metadata:
   labels:
     app: jaeger
 spec:
+  type: NodePort
   ports:
     - name: collector
       port: 14268
