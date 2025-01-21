@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import sanitize from 'sanitize-filename';
 import path from 'path';
 import os from 'os';
+import { tracer } from '../../tracing';
 
 const router = express.Router();
 
@@ -76,7 +77,7 @@ router.post(
   async (req: Request, res: Response) => {
     logger.info('Req Body is: ', req.body); // Should show title and price
     logger.info('Req files are: ', req.files); // Should show uploaded files
-
+    const span = tracer.startSpan('create-ticket');
     const { title, price } = req.body;
 
     const images: string[] = []; // Initialize images array
@@ -115,6 +116,7 @@ router.post(
 
     const message = 'Ticket has been created!';
 
+    span.end();
     res.status(201).send({ ticket, message });
   }
 );
