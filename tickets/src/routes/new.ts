@@ -11,9 +11,10 @@ import { format } from 'date-fns';
 import sanitize from 'sanitize-filename';
 import path from 'path';
 import os from 'os';
-import { tracer } from '../../tracing';
+import { TracerWrapper } from '@ndhcode/common';
 
 const router = express.Router();
+const tracerWrapper = new TracerWrapper('tickets-service');
 
 type MulterFile = Express.Multer.File;
 
@@ -75,9 +76,7 @@ router.post(
   ],
   validateRequest, // Validate after multer processes the request
   async (req: Request, res: Response) => {
-    logger.info('Req Body is: ', req.body); // Should show title and price
-    logger.info('Req files are: ', req.files); // Should show uploaded files
-    const span = tracer.startSpan('create-ticket');
+    const span = tracerWrapper.getTracer().startSpan('create-ticket');
     const { title, price } = req.body;
 
     const images: string[] = []; // Initialize images array
@@ -108,13 +107,21 @@ router.post(
         price: ticket.price,
         userId: ticket.userId,
         version: ticket.version,
-        images: ticket.images || []
+        images: ticket.images || [],
+        traceId: span.spanContext().traceId,
+        spanId: span.spanContext().spanId
       }
     };
-    
-    new TicketCreatedPublisher(natsWrapper.client).publish(ticketCreatedEvent.data);
-
     const message = 'Ticket has been created!';
+
+    span.setAttributes({
+      "ticket.id": ticket.id,
+      "ticket.title": ticket.title, 
+      "ticket.price": ticket.price
+    });
+
+
+    new TicketCreatedPublisher(natsWrapper.client).publish(ticketCreatedEvent.data);
 
     span.end();
     res.status(201).send({ ticket, message });
