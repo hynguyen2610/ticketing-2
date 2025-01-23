@@ -46,3 +46,4 @@ ehthumbs.db
 coverage/
 
 common/
+**/.DS_Store
