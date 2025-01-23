@@ -1,17 +1,22 @@
-import { Message, Stan } from 'node-nats-streaming';
-import { queueGroupName } from './queue-group-name';
 import {
-  TicketCreatedEvent,
+  ImagePublishedEvent,
+  ImageStatus,
   Listener,
   Subjects,
-  ImageStatus,
-  logger,
+  TicketCreatedEvent
 } from '@ndhcode/common';
+import { Message, Stan } from 'node-nats-streaming';
 import { Image } from '../../models/image';
+import { ImagePublishService } from '../../services/image-publisher-service';
+import { ImagePublishedPublisher } from '../publishers/image-published-publisher';
+import { queueGroupName } from './queue-group-name';
 
 export class TicketCreatedListener extends Listener<TicketCreatedEvent> {
   subject: Subjects.TicketCreated = Subjects.TicketCreated;
   queueGroupName = queueGroupName;
+
+  private publishService = ImagePublishService.getInstance();
+  private eventPublisher = new ImagePublishedPublisher(this.client);
 
   constructor(client: Stan) {
     super(client);
@@ -32,6 +37,17 @@ export class TicketCreatedListener extends Listener<TicketCreatedEvent> {
         });
 
         await image.save();
+        await this.publishService.publishImage(image);
+        const publishedImage = await Image.findById(image.id);
+
+        this.eventPublisher.publish({
+          id: publishedImage!.id,
+          filename: publishedImage!.filename,
+          publishedStatus: publishedImage!.publishedStatus,
+          publishedUrl: publishedImage?.publishedUrl!,
+          ticketId: publishedImage!.ticketId,
+          version: publishedImage!.version,
+        } as ImagePublishedEvent['data']);
       });
 
       await Promise.all(savePromises);
