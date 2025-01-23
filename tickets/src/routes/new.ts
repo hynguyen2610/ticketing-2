@@ -1,17 +1,24 @@
+import {
+  logger,
+  requireAuth,
+  Subjects,
+  TicketCreatedEvent,
+  TracerWrapper,
+  validateRequest,
+} from '@ndhcode/common';
+import { context, propagation } from '@opentelemetry/api';
+import { format } from 'date-fns';
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
-import { requireAuth, Subjects, TicketCreatedEvent, validateRequest } from '@ndhcode/common';
-import { Ticket } from '../models/ticket';
-import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
-import { natsWrapper } from '../nats-wrapper';
-import { logger } from '@ndhcode/common/';
-import multer from 'multer';
 import fs from 'fs';
-import { format } from 'date-fns';
-import sanitize from 'sanitize-filename';
-import path from 'path';
+import multer from 'multer';
 import os from 'os';
-import { TracerWrapper } from '@ndhcode/common';
+import path from 'path';
+import sanitize from 'sanitize-filename';
+import { TicketCreatedPublisher } from '../events/publishers/ticket-created-publisher';
+import { Ticket } from '../models/ticket';
+import { natsWrapper } from '../nats-wrapper';
+
 
 const router = express.Router();
 const tracerWrapper = new TracerWrapper('tickets-service');
@@ -24,7 +31,7 @@ const UPLOAD_DIR = isK8s ? '/app/uploads' : path.join(os.tmpdir(), 'uploads'); /
 console.log('upload dir:' + UPLOAD_DIR);
 
 if (!fs.existsSync(UPLOAD_DIR)) {
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
 // Set up storage engine for multer
@@ -94,10 +101,13 @@ router.post(
       title,
       price,
       userId: req.currentUser!.id,
-      images: images
+      images: images,
     });
 
     await ticket.save();
+
+    const headers = {};
+    propagation.inject(context.active(), headers);
 
     const ticketCreatedEvent: TicketCreatedEvent = {
       subject: Subjects.TicketCreated,
@@ -109,8 +119,9 @@ router.post(
         version: ticket.version,
         images: ticket.images || [],
         traceId: span.spanContext().traceId,
-        spanId: span.spanContext().spanId
-      }
+        spanId: span.spanContext().spanId,
+        traceHeaders: headers,
+      },
     };
     const message = 'Ticket has been created!';
 
