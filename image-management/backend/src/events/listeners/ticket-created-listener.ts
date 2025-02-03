@@ -3,8 +3,13 @@ import {
   ImageStatus,
   Listener,
   Subjects,
-  TicketCreatedEvent
+  TicketCreatedEvent,
+  TracerWrapper
 } from '@ndhcode/common';
+import {
+  context,
+  propagation
+} from '@opentelemetry/api';
 import { Message, Stan } from 'node-nats-streaming';
 import { Image } from '../../models/image';
 import { ImagePublishService } from '../../services/image-publisher-service';
@@ -17,43 +22,58 @@ export class TicketCreatedListener extends Listener<TicketCreatedEvent> {
 
   private publishService = ImagePublishService.getInstance();
   private eventPublisher = new ImagePublishedPublisher(this.client);
+  private tracerWrapper = new TracerWrapper('image-management-service');
 
   constructor(client: Stan) {
     super(client);
   }
 
   async onMessage(data: TicketCreatedEvent['data'], msg: Message) {
-    const { images, id } = data;
-    console.log('Image management received ticket created');
+    const { images, id, traceHeaders } = data;
 
-    if (images) {
-      console.log('Image management started saving');
-      const savePromises = images.map(async (filename) => {
-        const image = Image.build({
-          filename: filename,
-          publishedStatus: ImageStatus.Created,
-          publishedUrl: undefined,
-          ticketId: id,
+    const extractedParentContext = propagation.extract(
+      context.active(),
+      traceHeaders
+    );
+
+    const span = this.tracerWrapper.getTracer().startSpan(
+      'image-management:process-images',
+      {},
+      extractedParentContext
+    );
+
+    try {
+      if (images) {
+        const savePromises = images.map(async (filename) => {
+          const image = Image.build({
+            filename: filename,
+            publishedStatus: ImageStatus.Created,
+            publishedUrl: undefined,
+            ticketId: id,
+          });
+
+          await image.save();
+          await this.publishService.publishImage(image);
+          const publishedImage = await Image.findById(image.id);
+
+          this.eventPublisher.publish({
+            id: publishedImage!.id,
+            filename: publishedImage!.filename,
+            publishedStatus: publishedImage!.publishedStatus,
+            publishedUrl: publishedImage?.publishedUrl!,
+            ticketId: publishedImage!.ticketId,
+            version: publishedImage!.version,
+            traceHeaders: traceHeaders
+          } as ImagePublishedEvent['data']);
         });
 
-        await image.save();
-        await this.publishService.publishImage(image);
-        const publishedImage = await Image.findById(image.id);
-
-        this.eventPublisher.publish({
-          id: publishedImage!.id,
-          filename: publishedImage!.filename,
-          publishedStatus: publishedImage!.publishedStatus,
-          publishedUrl: publishedImage?.publishedUrl!,
-          ticketId: publishedImage!.ticketId,
-          version: publishedImage!.version,
-        } as ImagePublishedEvent['data']);
-      });
-
-      await Promise.all(savePromises);
-      console.log('Image management finished saving');
+        await Promise.all(savePromises);
+      }
+    } finally {
+      span.end();
     }
 
     msg.ack();
   }
 }
+
