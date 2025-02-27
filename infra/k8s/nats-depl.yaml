@@ -48,3 +48,18 @@ spec:
       protocol: TCP
       port: 8222
       targetPort: 8222
+---
+# TODO: Delete this after deploy go central server to k8s
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats-srv-ext
+spec:
+  selector:
+    app: nats
+  type: NodePort
+  ports:
+    - name: client
+      protocol: TCP
+      port: 4222
+      targetPort: 4222
