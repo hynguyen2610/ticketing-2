@@ -10,7 +10,7 @@ export default ({ currentUser }) => {
     { label: 'Sign In', href: '/auth/signin', condition: !currentUser },
     { label: 'Sell Ticket', href: '/tickets/new', condition: currentUser },
     { label: 'My Orders', href: '/orders', condition: currentUser },
-    { label: 'Sign Out', href: '/auth/signout', condition: currentUser },
+    { label: 'Sign Out', href: '/auth/logout', condition: currentUser },
   ]
     .filter(linkConfig => linkConfig.condition) // Filter based on the condition
     .map(({ label, href }) => (

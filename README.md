@@ -12,6 +12,16 @@ You can override these values using environment variables in the auth service:
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
 
+Optional Auth0 integration can be enabled by setting Auth0 environment variables for the auth service and using the public login/logout flow:
+- `AUTH0_DOMAIN`
+- `AUTH0_CLIENT_ID`
+- `AUTH0_CLIENT_SECRET`
+- `AUTH0_CALLBACK_URL`
+- `AUTH0_LOGOUT_REDIRECT_URL`
+- `AUTH0_AUDIENCE` (optional)
+
+The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
+
 ### Deploy system infrastructure
 
 ```sh

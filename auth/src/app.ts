@@ -4,6 +4,7 @@ import { json } from 'body-parser';
 import cookieSession from 'cookie-session';
 import { errorHandler, NotFoundError } from '@ndhcode/common';
 
+import { auth0Router } from './routes/auth0';
 import { currentUserRouter } from './routes/current-user';
 import { signinRouter } from './routes/signin';
 import { signoutRouter } from './routes/signout';
@@ -19,6 +20,7 @@ app.use(
   })
 );
 
+app.use(auth0Router);
 app.use(currentUserRouter);
 app.use(signinRouter);
 app.use(signoutRouter);

@@ -2,6 +2,8 @@
 
 This checklist is for replacing or integrating the current custom auth service with Auth0 in the ticketing system.
 
+> Status: Auth0 redirect flow is implemented in the auth service and client. Tenant/application setup, cluster deployment secrets, and full token validation middleware remain to be completed.
+
 ## 1. Auth0 tenant and application setup
 - [ ] Create an Auth0 tenant for the project.
 - [ ] Create a Single Page Application (SPA) in Auth0 for the client app.
@@ -23,9 +25,9 @@ This checklist is for replacing or integrating the current custom auth service w
 - [ ] Add cluster host callback/logout URLs if running in a remote cluster or preview environment.
 
 ## 3. Client app integration
-- [ ] Replace custom sign in / sign up pages with Auth0 login redirect or Auth0 SDK components.
+- [x] Replace custom sign in / sign up pages with Auth0 login redirect or Auth0 SDK components.
 - [ ] Install Auth0 SDK for Next.js or React, for example `@auth0/nextjs-auth0`.
-- [ ] Add Auth0 environment variables to the client app config:
+- [x] Add Auth0 environment variables to the client app config:
   - `AUTH0_DOMAIN`
   - `AUTH0_CLIENT_ID`
   - `AUTH0_CLIENT_SECRET` (if needed on the server side)
@@ -33,11 +35,12 @@ This checklist is for replacing or integrating the current custom auth service w
   - `AUTH0_REDIRECT_URI`
   - `AUTH0_POST_LOGOUT_REDIRECT_URI`
 - [ ] Update `client/pages/_app.js` to read user info from Auth0 instead of `/api/users/currentuser` if using Auth0 session hooks.
-- [ ] Change `client/pages/auth/signin.js` and `client/pages/auth/signup.js` to use Auth0 login/signup flows.
-- [ ] Update header/nav components to show login/logout state from Auth0 instead of the current `currentUser` object.
+- [x] Change `client/pages/auth/signin.js` and `client/pages/auth/signup.js` to use Auth0 login/signup flows.
+- [x] Update header/nav components to show login/logout state from Auth0 instead of the current `currentUser` object.
 
 ## 4. Auth service / backend integration
-- [ ] Decide whether the `auth` microservice remains as a custom user store, or whether Auth0 fully replaces it.
+- [x] Decide whether the `auth` microservice remains as a custom user store, or whether Auth0 fully replaces it.  
+  - Decision: keep the auth service as a metadata/session layer and add Auth0 callback support.
 - [ ] If Auth0 replaces backend auth entirely:
   - Remove or deprecate `/api/users/signin`, `/api/users/signup`, and `/api/users/signout` in the auth service.
   - Keep `/api/users/currentuser` only if it proxies Auth0 session data.
@@ -49,32 +52,32 @@ This checklist is for replacing or integrating the current custom auth service w
 - [ ] Update `auth/src/routes/current-user.ts` to derive the current user from Auth0 token claims if the auth service remains in use.
 
 ## 5. Environment and secrets
-- [ ] Add Auth0 variables to local and cluster environments.
-- [ ] For local development, set these values in the env files or deployment configs:
+- [x] Add Auth0 variables to local and cluster environments.
+- [x] For local development, set these values in the env files or deployment configs:
   - `AUTH0_DOMAIN`
   - `AUTH0_CLIENT_ID`
   - `AUTH0_CLIENT_SECRET`
   - `AUTH0_AUDIENCE`
   - `AUTH0_CALLBACK_URL`
   - `AUTH0_LOGOUT_REDIRECT_URL`
-- [ ] If the auth service still issues its own JWT, preserve `JWT_KEY` for that flow or migrate fully to Auth0.
+- [x] If the auth service still issues its own JWT, preserve `JWT_KEY` for that flow or migrate fully to Auth0.
 
 ## 6. Update deployment and Skaffold workflows
 - [ ] Add Auth0-related secrets to the auth service deployment manifest.
 - [ ] Add Auth0 env vars to the client deployment manifest if the Next.js app needs them at runtime.
 - [ ] Verify service URLs for the remote cluster if the callback URL is not `localhost`.
-- [ ] Document the local dev workflow.
+- [x] Document the local dev workflow.
 
 ## 7. Local development workflow
-- [ ] Bring up system infra:
+- [x] Bring up system infra:
   ```sh
   scripts/system-infra.sh up
   ```
-- [ ] Start the app with Skaffold and Auth0 port forwarding if needed:
+- [x] Start the app with Skaffold and Auth0 port forwarding if needed:
   ```sh
   scripts/dev.sh
   ```
-- [ ] Open the app at `http://localhost:3000`.
+- [x] Open the app at `http://localhost:3000`.
 - [ ] Confirm login redirects to Auth0 and returns to the app.
 - [ ] Confirm authenticated pages can call backend endpoints successfully.
 
