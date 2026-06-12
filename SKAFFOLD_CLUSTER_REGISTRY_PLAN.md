@@ -34,7 +34,10 @@ Make Skaffold build the application images locally and push them to the Docker r
    - Prefer setting `default-repo` at runtime:
 
      ```sh
-     skaffold run --profile cluster-registry --default-repo REGISTRY_HOST/ticketing
+     skaffold run \
+       --profile cluster-registry \
+       --default-repo REGISTRY_HOST/ticketing \
+       --insecure-registry REGISTRY_HOST
      ```
 
    - This avoids hard-coding one registry into every artifact name.
@@ -53,7 +56,10 @@ Make Skaffold build the application images locally and push them to the Docker r
    - Build and deploy once:
 
      ```sh
-     skaffold run --profile cluster-registry --default-repo REGISTRY_HOST/ticketing
+     skaffold run \
+       --profile cluster-registry \
+       --default-repo REGISTRY_HOST/ticketing \
+       --insecure-registry REGISTRY_HOST
      ```
 
    - Check that pods pull the pushed tags:
@@ -96,13 +102,16 @@ profiles:
 Run with the registry supplied at deploy time:
 
 ```sh
-skaffold run --profile cluster-registry --default-repo REGISTRY_HOST/ticketing
+skaffold run \
+  --profile cluster-registry \
+  --default-repo REGISTRY_HOST/ticketing \
+  --insecure-registry REGISTRY_HOST
 ```
 
 ## Acceptance Criteria
 
 - `skaffold dev` still works for local development.
-- `skaffold run --profile cluster-registry --default-repo REGISTRY_HOST/ticketing` builds, tags, pushes, and deploys all application images.
+- `skaffold run --profile cluster-registry --default-repo REGISTRY_HOST/ticketing --insecure-registry REGISTRY_HOST` builds, tags, pushes, and deploys all application images.
 - Kubernetes deployments use immutable Skaffold-generated tags instead of relying on `latest`.
 - All application pods reach `Running` or `Completed` without image pull errors.
 - The final registry command and any auth steps are captured in `README.md`.
