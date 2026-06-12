@@ -4,6 +4,14 @@ Make sure:
 - PVCs storageClass
 - system infra (MongoDB, NATS, Redis, Jaeger) is deployed before app services
 
+Default admin login:
+- email: `admin@test.com`
+- password: `password`
+
+You can override these values using environment variables in the auth service:
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+
 ### Deploy system infrastructure
 
 ```sh

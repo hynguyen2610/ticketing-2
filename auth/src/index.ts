@@ -1,6 +1,22 @@
 import mongoose from 'mongoose';
 
 import { app } from './app';
+import { User } from './models/user';
+
+const createDefaultAdmin = async () => {
+  const email = process.env.ADMIN_EMAIL || 'admin@test.com';
+  const password = process.env.ADMIN_PASSWORD || 'password';
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    console.log(`Default admin already exists: ${email}`);
+    return;
+  }
+
+  const admin = User.build({ email, password });
+  await admin.save();
+  console.log(`Created default admin user: ${email}`);
+};
 
 const start = async () => {
   console.log('Starting up...!!!');
@@ -15,6 +31,7 @@ const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connected to MongoDb');
+    await createDefaultAdmin();
   } catch (err) {
     console.error(err);
   }
