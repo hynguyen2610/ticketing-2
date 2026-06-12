@@ -62,9 +62,10 @@ router.get('/auth/login', async (req, res, next) => {
     const codeChallenge = generators.codeChallenge(codeVerifier);
     const state = generators.random();
     const screenHint = req.query.screen_hint === 'signup' ? 'signup' : undefined;
+    const sessionData = req.session || {};
 
     req.session = {
-      ...req.session,
+      ...sessionData,
       auth0CodeVerifier: codeVerifier,
       auth0State: state,
     };

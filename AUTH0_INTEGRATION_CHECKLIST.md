@@ -19,7 +19,7 @@ This checklist is for replacing or integrating the current custom auth service w
   - Allowed CORS Origins
 
 ## 2. Configure redirect URLs and origins
-- [ ] Add local dev callback URL: `http://localhost:3000/api/auth/callback` (or the callback route used in the app).
+- [ ] Add local dev callback URL: `http://localhost:3000/auth/callback` (or the callback route used in the app).
 - [ ] Add local dev logout redirect URL: `http://localhost:3000`.
 - [ ] Add local dev origin: `http://localhost:3000`.
 - [ ] Add cluster host callback/logout URLs if running in a remote cluster or preview environment.
