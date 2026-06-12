@@ -10,7 +10,7 @@ Make sure:
 scripts/system-infra.sh up
 ```
 
-Use this script to apply system-level Kubernetes resources from `infra/k8s-system`.
+This script creates static hostPath PersistentVolumes from `infra/pvc/static-pvs.yaml`, applies PersistentVolumeClaims from `infra/pvc`, and then deploys system-level resources from `infra/k8s-system`.
 If you need to tear down the system infra, run:
 
 ```sh
