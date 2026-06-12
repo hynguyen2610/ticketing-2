@@ -4,6 +4,21 @@ Make sure:
 - PVCs storageClass
 - system infra (MongoDB, NATS, Redis, Jaeger) is deployed before app services
 
+### Deploy system infrastructure
+
+```sh
+scripts/system-infra.sh up
+```
+
+Use this script to apply system-level Kubernetes resources from `infra/k8s-system`.
+If you need to tear down the system infra, run:
+
+```sh
+scripts/system-infra.sh down
+```
+
+> Secrets are not created by this script; create `JWT_KEY` and `STRIPE_KEY` before running it.
+
 ## Build and push with Skaffold
 
 The default Skaffold workflow keeps local development fast and does not push images:
