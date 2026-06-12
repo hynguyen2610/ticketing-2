@@ -29,13 +29,14 @@ First bring up the system infra:
 scripts/system-infra.sh up
 ```
 
-Then start Skaffold dev from the repo root using the cluster registry:
+Then start Skaffold dev from the repo root using the cluster registry and service port forwarding:
 
 ```sh
 skaffold dev \
   --profile cluster-registry \
   --default-repo 100.114.61.78:30500/ticketing \
-  --insecure-registry 100.114.61.78:30500
+  --insecure-registry 100.114.61.78:30500 \
+  --port-forward=services
 ```
 
 Or use the helper script:
@@ -43,6 +44,8 @@ Or use the helper script:
 ```sh
 scripts/dev.sh
 ```
+
+On success, Skaffold will forward service ports for the frontend apps to localhost.
 
 > This project is using a remote cluster registry, so `skaffold dev` must push images to `100.114.61.78:30500/ticketing` before deployments can start.
 
