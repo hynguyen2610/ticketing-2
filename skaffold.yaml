@@ -3,8 +3,7 @@ kind: Config
 deploy:
   kubectl:
     manifests:
-      - ./infra/k8s/*
-      - ./infra/k8s-dev/*
+      - ./infra/k8s-apps/*
 build:
   tagPolicy:
     gitCommit: {}

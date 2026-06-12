@@ -6,10 +6,10 @@
 - Remove dependency on ingress-nginx and expose services without an ingress controller.
 
 ## Current state
-- `skaffold.yaml` deploys `./infra/k8s/*` and `./infra/k8s-dev/*`.
-- System infra resources (message queue, databases, PV/PVC, secrets) are mixed with application manifests.
-- `infra/k8s-dev/ingress-srv.yaml` and `infra/k8s-prod/ingress-srv.yaml` require ingress-nginx.
-- `client/api/build-client.js` references `ingress-nginx-controller.ingress-nginx.svc.cluster.local`.
+- `skaffold.yaml` deploys `./infra/k8s-apps/*` only.
+- System infra resources (message queue, databases, PV/PVC, secrets) are now isolated in `./infra/k8s-system/`.
+- `infra/k8s-dev/ingress-srv.yaml` and `infra/k8s-prod/ingress-srv.yaml` have been removed as ingress-nginx dependencies.
+- `client/api/build-client.js` now targets direct service routing instead of the ingress controller.
 
 ## Refactor checklist
 

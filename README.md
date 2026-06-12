@@ -1,8 +1,8 @@
 Before running the app.
 Make sure:
-- Ingress Nginx installed to k8s cluster.
 - 2 secrets exist: JWT_KEY and STRIPE_KEY
 - PVCs storageClass
+- system infra (MongoDB, NATS, Redis, Jaeger) is deployed before app services
 
 ## Build and push with Skaffold
 

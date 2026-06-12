@@ -1,7 +1,5 @@
-Install ingress-nginx
-```
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/cloud/deploy.yaml
-```
+There is no ingress-nginx dependency for this deployment.
+The app uses direct service routing and NodePort/LoadBalancer service exposure instead.
 
 Need to install react-stripe-checkout
 ```
