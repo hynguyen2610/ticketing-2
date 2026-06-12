@@ -18,6 +18,33 @@ scripts/system-infra.sh down
 ```
 
 > Secrets are not created by this script; create `JWT_KEY` and `STRIPE_KEY` before running it.
+>
+> The client app now proxies `/api/*` routes to internal service DNS names, so an ingress controller is no longer required for local development.
+
+## Run local development
+
+First bring up the system infra:
+
+```sh
+scripts/system-infra.sh up
+```
+
+Then start Skaffold dev from the repo root using the cluster registry:
+
+```sh
+skaffold dev \
+  --profile cluster-registry \
+  --default-repo 100.114.61.78:30500/ticketing \
+  --insecure-registry 100.114.61.78:30500
+```
+
+Or use the helper script:
+
+```sh
+scripts/dev.sh
+```
+
+> This project is using a remote cluster registry, so `skaffold dev` must push images to `100.114.61.78:30500/ticketing` before deployments can start.
 
 ## Build and push with Skaffold
 
