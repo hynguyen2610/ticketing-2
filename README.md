@@ -19,7 +19,7 @@ Optional Auth0 integration can be enabled by setting Auth0 environment variables
 - `AUTH0_CALLBACK_URL`
 - `AUTH0_LOGOUT_REDIRECT_URL`
 - `AUTH0_AUDIENCE` (optional)
-
+For clusters, the auth deployment now reads these values from a secret named `auth0-secret`. Create the secret before deploying the auth service.
 The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
 
 ### Deploy system infrastructure
