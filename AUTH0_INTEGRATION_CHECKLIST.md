@@ -1,100 +1,203 @@
 # Auth0 Integration Checklist
 
-This checklist is for replacing or integrating the current custom auth service with Auth0 in the ticketing system.
+This checklist tracks the current Auth0 integration status for the ticketing
+system.
 
-> Status: Auth0 redirect flow is implemented in the auth service and client. Tenant/application setup, cluster deployment secrets, and full token validation middleware remain to be completed.
+> Current status: Auth0 is partially integrated. The client routes login,
+> signup, callback, and logout through the existing `auth` service. The `auth`
+> service acts as the OIDC client, exchanges the Auth0 callback, creates or
+> finds the local user, and preserves the existing cookie JWT contract used by
+> the other services. Tenant setup, real secret values, runtime verification,
+> and full Auth0 token validation are still pending.
 
-## 1. Auth0 tenant and application setup
+## Architecture Decision
+
+- [x] Keep the `auth` microservice as the compatibility/session layer.
+- [x] Preserve the existing internal cookie JWT so `tickets`, `orders`,
+  `payment`, and image services can continue using `@ndhcode/common`
+  `currentUser` middleware.
+- [x] Use Auth0 for browser login/signup/logout redirects.
+- [ ] Decide whether this is the final architecture or a migration bridge.
+  - Option A: keep Auth0 only at the `auth` service boundary and continue using
+    internal JWT cookies between frontend and services.
+  - Option B: migrate backend services to validate Auth0 access tokens directly
+    using issuer, audience, and JWKS.
+
+## Current Implementation
+
+- [x] `auth/src/routes/auth0.ts` adds:
+  - `/auth/login`
+  - `/auth/callback`
+  - `/auth/logout`
+- [x] Auth0 login uses authorization-code flow with PKCE.
+- [x] Auth0 callback validates stored `state` and PKCE verifier.
+- [x] Auth0 callback reads ID token claims, requires an email, creates or finds
+  the local user, and stores:
+  - existing internal `jwt`
+  - `auth0IdToken`
+  - `auth0AccessToken`
+  - `auth0User`
+- [x] `auth/src/routes/current-user.ts` can return either the internal JWT user
+  or `auth0User` from the session.
+- [x] `client/pages/auth/signin.js` links to `/auth/login`.
+- [x] `client/pages/auth/signup.js` links to `/auth/login?screen_hint=signup`.
+- [x] `client/pages/auth/signout.js` redirects to `/auth/logout`.
+- [x] `client/next.config.js` rewrites `/auth/login`, `/auth/callback`, and
+  `/auth/logout` to `auth-srv`.
+- [x] `infra/k8s-apps/auth-depl.yaml` reads Auth0 values from `auth0-secret`.
+- [x] `infra/k8s-apps/auth0-secret.example.yaml` exists as a placeholder
+  template.
+- [x] `README.md` documents the Auth0 secret values and local workflow.
+
+## Not Implemented Yet
+
+- [ ] The client does not use `@auth0/nextjs-auth0` or another Auth0 SDK.
+  - Current behavior intentionally depends on the auth service OIDC flow.
+- [ ] Backend services do not validate Auth0-issued access tokens directly.
+  - They still validate the internal JWT cookie signed by `JWT_KEY`.
+- [ ] Auth0 ID/access tokens stored in the cookie session are not used by other
+  services yet.
+- [ ] No automated tests cover `/auth/login`, `/auth/callback`, `/auth/logout`,
+  or Auth0 current-user behavior.
+- [ ] No runtime verification has confirmed a real Auth0 tenant can complete
+  login/logout against the local Kubernetes workflow.
+
+## 1. Auth0 Tenant And Application Setup
+
 - [ ] Create an Auth0 tenant for the project.
-- [ ] Create a Single Page Application (SPA) in Auth0 for the client app.
-- [ ] Create a Machine-to-Machine or Regular Web Application if the auth service needs server-side token exchange.
+- [ ] Create an Auth0 Regular Web Application for the auth service OIDC flow.
+  - The current server-side callback requires `AUTH0_CLIENT_SECRET`, so this
+    should not be configured as a pure SPA-only integration unless the client
+    architecture changes.
+- [ ] Configure the application to allow Authorization Code with PKCE.
 - [ ] Record the Auth0 settings:
   - Domain
   - Client ID
   - Client Secret
-  - Audience (if using API access)
+  - Audience, if API access is needed
   - Allowed Callback URLs
   - Allowed Logout URLs
   - Allowed Web Origins
   - Allowed CORS Origins
+- [ ] Confirm Auth0 user profiles include `email`.
 
-## 2. Configure redirect URLs and origins
-- [ ] Add local dev callback URL: `http://localhost:3000/auth/callback` (or the callback route used in the app).
-- [ ] Add local dev logout redirect URL: `http://localhost:3000`.
-- [ ] Add local dev origin: `http://localhost:3000`.
-- [ ] Add cluster host callback/logout URLs if running in a remote cluster or preview environment.
+## 2. Configure Redirect URLs And Origins
 
-## 3. Client app integration
-- [x] Replace custom sign in / sign up pages with Auth0 login redirect or Auth0 SDK components.
-- [ ] Install Auth0 SDK for Next.js or React, for example `@auth0/nextjs-auth0`.
-- [x] Add Auth0 environment variables to the client app config:
-  - `AUTH0_DOMAIN`
-  - `AUTH0_CLIENT_ID`
-  - `AUTH0_CLIENT_SECRET` (if needed on the server side)
-  - `AUTH0_AUDIENCE`
-  - `AUTH0_REDIRECT_URI`
-  - `AUTH0_POST_LOGOUT_REDIRECT_URI`
-- [ ] Update `client/pages/_app.js` to read user info from Auth0 instead of `/api/users/currentuser` if using Auth0 session hooks.
-- [x] Change `client/pages/auth/signin.js` and `client/pages/auth/signup.js` to use Auth0 login/signup flows.
-- [x] Update header/nav components to show login/logout state from Auth0 instead of the current `currentUser` object.
+- [ ] Add local callback URL: `http://localhost:3000/auth/callback`.
+- [ ] Add local logout redirect URL: `http://localhost:3000`.
+- [ ] Add local web origin: `http://localhost:3000`.
+- [ ] Add cluster host callback/logout URLs if running through a remote host,
+  preview environment, or non-local NodePort.
+- [ ] Confirm `AUTH0_CALLBACK_URL` exactly matches one of the configured Auth0
+  callback URLs.
+- [ ] Confirm `AUTH0_LOGOUT_REDIRECT_URL` exactly matches one of the configured
+  Auth0 logout URLs.
 
-## 4. Auth service / backend integration
-- [x] Decide whether the `auth` microservice remains as a custom user store, or whether Auth0 fully replaces it.  
-  - Decision: keep the auth service as a metadata/session layer and add Auth0 callback support.
-- [ ] If Auth0 replaces backend auth entirely:
-  - Remove or deprecate `/api/users/signin`, `/api/users/signup`, and `/api/users/signout` in the auth service.
-  - Keep `/api/users/currentuser` only if it proxies Auth0 session data.
-- [ ] If keeping the auth service for user metadata:
-  - Add Auth0 JWT validation middleware in `auth/src/app.ts` or a shared middleware package.
-  - Verify JWT signature using Auth0 issuer and JWKS endpoint.
-  - Accept Auth0-issued access tokens or ID tokens in requests.
-- [ ] Ensure the backend uses Auth0 AUDIENCE/AUTH0_DOMAIN to validate incoming tokens.
-- [x] Update `auth/src/routes/current-user.ts` to derive the current user from Auth0 token claims if the auth service remains in use.
+## 3. Environment And Secrets
 
-## 5. Environment and secrets
-- [x] Add Auth0 variables to local and cluster environments.
-- [x] For local development, set these values in the env files or deployment configs:
+- [x] Add Auth0 secret references to `infra/k8s-apps/auth-depl.yaml`.
+- [x] Add `infra/k8s-apps/auth0-secret.example.yaml` as a safe placeholder.
+- [x] Document the manual `kubectl create secret generic auth0-secret` command
+  in `README.md`.
+- [ ] Create the real Kubernetes secret in the target cluster:
   - `AUTH0_DOMAIN`
   - `AUTH0_CLIENT_ID`
   - `AUTH0_CLIENT_SECRET`
-  - `AUTH0_AUDIENCE`
   - `AUTH0_CALLBACK_URL`
   - `AUTH0_LOGOUT_REDIRECT_URL`
-- [x] If the auth service still issues its own JWT, preserve `JWT_KEY` for that flow or migrate fully to Auth0.
+  - `AUTH0_AUDIENCE`
+- [ ] Confirm `JWT_KEY` still exists because the auth service still issues the
+  internal JWT cookie after Auth0 login.
+- [ ] Decide how to manage local developer secrets outside source control.
+- [ ] Do not commit a real `infra/k8s-apps/auth0-secret.yaml`.
 
-## 6. Update deployment and Skaffold workflows
-- [ ] Add Auth0-related secrets to the auth service deployment manifest.
-- [ ] Add Auth0 env vars to the client deployment manifest if the Next.js app needs them at runtime.
-- [ ] Verify service URLs for the remote cluster if the callback URL is not `localhost`.
-- [x] Document the local dev workflow.
+## 4. Client App Integration
 
-## 7. Local development workflow
-- [x] Bring up system infra:
+- [x] Replace custom sign-in and sign-up page actions with Auth0 redirect links.
+- [x] Route sign-out through Auth0 logout.
+- [x] Keep `client/pages/_app.js` reading user state from
+  `/api/users/currentuser`.
+- [x] Keep header/nav login state based on the existing `currentUser` object.
+- [ ] Add error handling or user-facing feedback for failed Auth0 redirects.
+- [ ] Decide whether to keep the auth-service redirect model or migrate the
+  client to `@auth0/nextjs-auth0`.
+- [ ] If migrating to `@auth0/nextjs-auth0`, add client/server environment
+  variables and replace the current `/auth/*` rewrite model.
+
+## 5. Auth Service Integration
+
+- [x] Add Auth0 OIDC routes to the auth service.
+- [x] Keep custom `/api/users/signin`, `/api/users/signup`, and
+  `/api/users/signout` routes for local fallback/backward compatibility.
+- [x] Create or find local users by Auth0 email during callback.
+- [x] Issue the existing internal JWT cookie after successful Auth0 callback.
+- [ ] Add automated tests for missing Auth0 env vars.
+- [ ] Add automated tests for callback state mismatch.
+- [ ] Add automated tests for successful Auth0 callback using mocked
+  `openid-client`.
+- [ ] Consider storing a stable Auth0 subject (`sub`) on the local user model
+  instead of linking only by email.
+- [ ] Consider clearing Auth0 session metadata on local `/api/users/signout`.
+
+## 6. Backend Service Token Strategy
+
+- [x] Continue using internal `JWT_KEY`-signed cookies for existing services.
+- [ ] If keeping this strategy, document that backend services trust only the
+  auth service's internal JWT, not raw Auth0 tokens.
+- [ ] If migrating to direct Auth0 validation:
+  - Add Auth0 JWT validation middleware to a shared package.
+  - Verify JWT signature with Auth0 issuer and JWKS.
+  - Validate issuer and audience.
+  - Update protected routes to accept bearer tokens or a consistent cookie
+    strategy.
+  - Update tests in every service that currently signs local JWTs.
+
+## 7. Deployment And Skaffold Workflow
+
+- [x] Auth deployment references `auth0-secret`.
+- [x] Client deployment does not need Auth0 env vars in the current
+  auth-service redirect architecture.
+- [x] Client rewrites proxy `/auth/*` and `/api/*` to cluster service DNS names.
+- [ ] Verify Skaffold deploy succeeds when `auth0-secret`, `jwt-secret`, and
+  `stripe-secret` already exist.
+- [ ] Verify local service port forwarding exposes the client at
+  `http://localhost:3000`.
+- [ ] Verify remote cluster callback/logout URLs if not using localhost.
+
+## 8. Local Verification
+
+- [ ] Bring up system infrastructure:
   ```sh
   scripts/system-infra.sh up
   ```
-- [x] Start the app with Skaffold and Auth0 port forwarding if needed:
+- [ ] Create/update real secrets in the cluster.
+- [ ] Start the app:
   ```sh
   scripts/dev.sh
   ```
-- [x] Open the app at `http://localhost:3000`.
-- [ ] Confirm login redirects to Auth0 and returns to the app.
-- [ ] Confirm authenticated pages can call backend endpoints successfully.
+- [ ] Open `http://localhost:3000`.
+- [ ] Click Sign In and confirm redirect to Auth0.
+- [ ] Complete Auth0 login and confirm redirect back to `/auth/callback`, then
+  `/`.
+- [ ] Confirm `/api/users/currentuser` returns the authenticated user.
+- [ ] Confirm authenticated pages, ticket creation, orders, and payment flows
+  still work with the internal JWT cookie.
+- [ ] Click Sign Out and confirm Auth0 logout redirects back to the app.
 
-## 8. Test and verify
-- [ ] Confirm login and logout work from the client.
-- [ ] Confirm `currentUser` state is populated correctly after Auth0 authentication.
-- [ ] Confirm protected routes and API calls validate the Auth0 token.
-- [ ] Confirm token refresh and session persistence if using Auth0 SDK.
-- [ ] Confirm sign-out clears the Auth0 session and redirects correctly.
+## 9. Test Plan
 
-## 9. Optional improvements
+- [ ] Add auth service tests for Auth0 routes.
+- [ ] Add client smoke tests for signin/signup/signout links.
+- [ ] Add an integration or e2e test path that can run with mocked Auth0.
+- [ ] Manually verify with a real Auth0 tenant before marking integration done.
+
+## 10. Optional Improvements
+
+- [ ] Store Auth0 `sub` on local users and handle email changes safely.
 - [ ] Add roles or permissions in Auth0 for admin vs regular users.
-- [ ] Add an Auth0 rule or Action to populate custom claims.
-- [ ] Add multi-tenant or organization support if needed.
-- [ ] Add Auth0 logout hooks for cross-app sign-out.
+- [ ] Add an Auth0 Action to populate custom claims.
+- [ ] Add organization support if needed.
+- [ ] Add a dedicated callback error page.
+- [ ] Reduce cookie size by avoiding storage of raw Auth0 tokens in the session
+  unless they are actually needed.
 
-## Notes
-- The current system uses cookie-based JWT sessions at `auth/src/routes/signin.ts` and `auth/src/routes/signup.ts`.
-- Integrating Auth0 will require changing the auth flow from custom user/password forms to an OAuth/OIDC redirect flow.
-- If the auth service remains deployed, it can be adapted to validate Auth0 tokens and act as a metadata service.

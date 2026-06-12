@@ -19,7 +19,28 @@ Optional Auth0 integration can be enabled by setting Auth0 environment variables
 - `AUTH0_CALLBACK_URL`
 - `AUTH0_LOGOUT_REDIRECT_URL`
 - `AUTH0_AUDIENCE` (optional)
-For clusters, the auth deployment now reads these values from a secret named `auth0-secret`. Create the secret before deploying the auth service.
+
+For clusters, the auth deployment reads these values from a secret named `auth0-secret`. Create that secret manually before deploying the auth service.
+
+Use `infra/k8s-apps/auth0-secret.example.yaml` as a safe placeholder template, then create the real secret manually from the cluster or with `kubectl create secret generic`.
+
+Example command:
+```sh
+kubectl create secret generic auth0-secret \
+  --from-literal=AUTH0_DOMAIN=<your-auth0-domain> \
+  --from-literal=AUTH0_CLIENT_ID=<your-auth0-client-id> \
+  --from-literal=AUTH0_CLIENT_SECRET=<your-auth0-client-secret> \
+  --from-literal=AUTH0_CALLBACK_URL=http://localhost:3000/auth/callback \
+  --from-literal=AUTH0_LOGOUT_REDIRECT_URL=http://localhost:3000 \
+  --from-literal=AUTH0_AUDIENCE=<your-auth0-audience>
+```
+
+`AUTH0_DOMAIN` should be the tenant domain only, for example `dev-xxxxx.us.auth0.com`. Do not use the Auth0 dashboard URL.
+
+`AUTH0_AUDIENCE` is optional. If you deploy to a remote cluster host, replace the callback and logout URLs with the external app URL instead of `localhost`.
+
+> Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
+
 The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
 
 ### Deploy system infrastructure
