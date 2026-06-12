@@ -129,6 +129,7 @@ router.get('/auth/callback', async (req, res, next) => {
       auth0IdToken: tokenSet.id_token,
       auth0AccessToken: tokenSet.access_token,
       auth0User: {
+        id: user.id,
         email,
         name: claims.name,
         sub: claims.sub,
