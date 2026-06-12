@@ -4,7 +4,8 @@ import { currentUser } from '@ndhcode/common';
 const router = express.Router();
 
 router.get('/api/users/currentuser', currentUser, (req, res) => {
-  res.send({ currentUser: req.currentUser || null });
+  const auth0Profile = (req.session as any)?.auth0User || null;
+  res.send({ currentUser: req.currentUser || auth0Profile });
 });
 
 export { router as currentUserRouter };

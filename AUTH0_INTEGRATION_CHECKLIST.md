@@ -49,7 +49,7 @@ This checklist is for replacing or integrating the current custom auth service w
   - Verify JWT signature using Auth0 issuer and JWKS endpoint.
   - Accept Auth0-issued access tokens or ID tokens in requests.
 - [ ] Ensure the backend uses Auth0 AUDIENCE/AUTH0_DOMAIN to validate incoming tokens.
-- [ ] Update `auth/src/routes/current-user.ts` to derive the current user from Auth0 token claims if the auth service remains in use.
+- [x] Update `auth/src/routes/current-user.ts` to derive the current user from Auth0 token claims if the auth service remains in use.
 
 ## 5. Environment and secrets
 - [x] Add Auth0 variables to local and cluster environments.

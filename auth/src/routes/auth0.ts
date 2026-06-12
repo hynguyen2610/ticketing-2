@@ -124,7 +124,15 @@ router.get('/auth/callback', async (req, res, next) => {
     );
 
     req.session = {
+      ...req.session,
       jwt: userJwt,
+      auth0IdToken: tokenSet.id_token,
+      auth0AccessToken: tokenSet.access_token,
+      auth0User: {
+        email,
+        name: claims.name,
+        sub: claims.sub,
+      },
     };
 
     res.redirect('/');
