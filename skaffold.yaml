@@ -80,3 +80,62 @@ profiles:
     build:
       local:
         push: true
+  - name: cluster-docker
+    build:
+      local:
+        push: true
+  - name: cluster-builder
+    patches:
+      - op: remove
+        path: /build/artifacts/0/docker
+      - op: add
+        path: /build/artifacts/0/kaniko
+        value:
+          dockerfile: Dockerfile
+      - op: remove
+        path: /build/artifacts/1/docker
+      - op: add
+        path: /build/artifacts/1/kaniko
+        value:
+          dockerfile: Dockerfile
+      - op: remove
+        path: /build/artifacts/2/docker
+      - op: add
+        path: /build/artifacts/2/kaniko
+        value:
+          dockerfile: Dockerfile
+      - op: remove
+        path: /build/artifacts/3/docker
+      - op: add
+        path: /build/artifacts/3/kaniko
+        value:
+          dockerfile: Dockerfile
+      - op: remove
+        path: /build/artifacts/4/docker
+      - op: add
+        path: /build/artifacts/4/kaniko
+        value:
+          dockerfile: Dockerfile
+      - op: remove
+        path: /build/artifacts/5/docker
+      - op: add
+        path: /build/artifacts/5/kaniko
+        value:
+          dockerfile: Dockerfile
+      - op: remove
+        path: /build/artifacts/6/docker
+      - op: add
+        path: /build/artifacts/6/kaniko
+        value:
+          dockerfile: Dockerfile
+      - op: remove
+        path: /build/artifacts/7/docker
+      - op: add
+        path: /build/artifacts/7/kaniko
+        value:
+          dockerfile: Dockerfile
+    build:
+      cluster:
+        namespace: default
+        concurrency: 1
+        timeout: 30m

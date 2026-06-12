@@ -30,7 +30,19 @@ Make Skaffold build the application images locally and push them to the Docker r
    - Add a profile such as `cluster-registry` that sets `build.local.push: true`.
    - Add `build.local.useDockerCLI: true` only if the local Docker CLI context is required.
 
-3. Make image names registry-aware.
+3. Add a dedicated Skaffold profile for in-cluster builds.
+   - Add a profile such as `cluster-builder` that switches `build.local` to `build.cluster`.
+   - Patch each Docker artifact to use the equivalent Kaniko artifact while this profile is active.
+   - Keep build concurrency low for a single-node cluster.
+   - Use the same `--default-repo` registry target so images are pushed where deployments can pull them.
+
+4. Add a remote-Docker path for the Linux cluster machine.
+   - Add a profile such as `cluster-docker` that keeps Docker artifacts and enables `build.local.push: true`.
+   - Run Skaffold with `DOCKER_HOST=ssh://USER@NODE_IP` so Docker builds happen on the Linux machine.
+   - Still push to the registry because the Kubernetes node reports `containerd`, so Docker's local image store is not guaranteed to be the runtime image store.
+   - Ensure the Linux Docker daemon allows the insecure registry `NODE_IP:30500`.
+
+5. Make image names registry-aware.
    - Prefer setting `default-repo` at runtime:
 
      ```sh
@@ -47,12 +59,12 @@ Make Skaffold build the application images locally and push them to the Docker r
      REGISTRY_HOST/ticketing/bluestorm1288/ticketing-auth:<git-tag>
      ```
 
-4. Decide whether to preserve or remove the `bluestorm1288` namespace.
+6. Decide whether to preserve or remove the `bluestorm1288` namespace.
    - Fastest path: keep current artifact names and use `--default-repo`.
    - Cleaner path: rename artifacts to short names like `ticketing-auth`, then use `--default-repo REGISTRY_HOST/ticketing`.
    - If renaming artifacts, update Kubernetes manifests to match the new artifact names so Skaffold can still rewrite them.
 
-5. Verify cluster image pulls.
+7. Verify cluster image pulls.
    - Build and deploy once:
 
      ```sh
@@ -71,11 +83,11 @@ Make Skaffold build the application images locally and push them to the Docker r
 
    - Confirm no pod is stuck in `ImagePullBackOff` or `ErrImagePull`.
 
-6. Add registry authentication only if needed.
+8. Add registry authentication only if needed.
    - For Docker push auth, run `docker login REGISTRY_HOST`.
    - For Kubernetes pull auth, create an image pull secret and attach it to the relevant service account or deployments.
 
-7. Document the final command.
+9. Document the final command.
    - Add the selected command to `README.md` once the registry host is confirmed.
    - Include any cluster-specific setup, such as local registry mirror config or image pull secret creation.
 
@@ -99,6 +111,35 @@ profiles:
         push: true
 ```
 
+Add a remote-Docker profile for the Linux cluster machine:
+
+```yaml
+profiles:
+  - name: cluster-docker
+    build:
+      local:
+        push: true
+```
+
+Add an in-cluster build profile:
+
+```yaml
+profiles:
+  - name: cluster-builder
+    patches:
+      - op: remove
+        path: /build/artifacts/0/docker
+      - op: add
+        path: /build/artifacts/0/kaniko
+        value:
+          dockerfile: Dockerfile
+    build:
+      cluster:
+        namespace: default
+        concurrency: 1
+        timeout: 30m
+```
+
 Run with the registry supplied at deploy time:
 
 ```sh
@@ -108,10 +149,27 @@ skaffold run \
   --insecure-registry REGISTRY_HOST
 ```
 
+Run with in-cluster Kaniko builds:
+
+```sh
+skaffold run \
+  --profile cluster-builder \
+  --default-repo REGISTRY_HOST/ticketing \
+  --insecure-registry REGISTRY_HOST
+```
+
+Run with Docker on the Linux cluster machine:
+
+```sh
+CLUSTER_DOCKER_HOST=ssh://USER@NODE_IP scripts/skaffold-cluster-docker.sh
+```
+
 ## Acceptance Criteria
 
 - `skaffold dev` still works for local development.
 - `skaffold run --profile cluster-registry --default-repo REGISTRY_HOST/ticketing --insecure-registry REGISTRY_HOST` builds, tags, pushes, and deploys all application images.
+- `CLUSTER_DOCKER_HOST=ssh://USER@NODE_IP scripts/skaffold-cluster-docker.sh` builds with Docker on the Linux machine, pushes, and deploys all application images.
+- `skaffold run --profile cluster-builder --default-repo REGISTRY_HOST/ticketing --insecure-registry REGISTRY_HOST` builds in Kubernetes using Kaniko, pushes, and deploys all application images.
 - Kubernetes deployments use immutable Skaffold-generated tags instead of relying on `latest`.
 - All application pods reach `Running` or `Completed` without image pull errors.
 - The final registry command and any auth steps are captured in `README.md`.
