@@ -15,8 +15,8 @@ export default () => {
                 src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
                 strategy="beforeInteractive"
             />
-            <footer class="footer">
-                <div class="container">
+            <footer className="footer">
+                <div className="container">
                     <span>&copy; 2023 Your Company</span>
                 </div>
             </footer>

@@ -179,7 +179,8 @@ system.
   `AUTH0_AUDIENCE`.
 - [x] Client deployment does not need Auth0 env vars in the current
   auth-service redirect architecture.
-- [x] Client rewrites proxy `/auth/*` and `/api/*` to cluster service DNS names.
+- [x] Client rewrites proxy `/auth/*` and `/api/*` to Kubernetes service env
+  addresses, with service-name fallbacks for local development.
 - [x] Client Auth0 link smoke test can be run with:
   ```sh
   cd client && npm run test:auth0-links
@@ -201,6 +202,8 @@ system.
 - [x] Verify local service port forwarding exposes the client.
   - `kubectl port-forward svc/client-srv 13100:3000` served homepage,
     sign-in, and sign-up pages with `200 OK`.
+  - `/auth/login` through the client now reaches the auth service and returns
+    the expected placeholder-secret `400` instead of a client proxy `500`.
   - `http://localhost:3000` is currently occupied by the image-management
     frontend in this environment, so the verified ticketing client URL was
     `http://127.0.0.1:13100`.

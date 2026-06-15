@@ -24,6 +24,7 @@ const assertExcludes = (content, expected, label) => {
 
 const run = () => {
   const buildClient = readClientFile('api/build-client.js');
+  const nextConfig = readClientFile('next.config.js');
   const app = readClientFile('pages/_app.js');
   const index = readClientFile('pages/index.js');
 
@@ -36,6 +37,10 @@ const run = () => {
   assertIncludes(buildClient, 'serverClient.interceptors.request.use', 'build client');
   assertIncludes(buildClient, 'timeout: 3000', 'build client');
   assertExcludes(buildClient, "baseURL: 'http://client-srv:3000'", 'build client');
+  assertIncludes(nextConfig, 'serviceBaseUrl', 'Next rewrites');
+  assertIncludes(nextConfig, "'AUTH_SRV_SERVICE_HOST'", 'Next rewrites');
+  assertIncludes(nextConfig, '`${serviceBaseUrls.auth}/auth/login`', 'Next rewrites');
+  assertExcludes(nextConfig, "destination: 'http://auth-srv:3000/auth/login'", 'Next rewrites');
   assertIncludes(app, 'currentUser = null', 'app current user fallback');
   assertIncludes(app, 'catch (err)', 'app current user fallback');
   assertIncludes(index, 'return { tickets: [] }', 'homepage ticket fallback');

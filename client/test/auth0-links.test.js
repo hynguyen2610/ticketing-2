@@ -38,18 +38,21 @@ const run = async () => {
 
   const nextConfig = require('../next.config');
   const rewrites = await nextConfig.rewrites();
+  const authBaseUrl = process.env.AUTH_SRV_SERVICE_HOST
+    ? `http://${process.env.AUTH_SRV_SERVICE_HOST}:${process.env.AUTH_SRV_SERVICE_PORT || '3000'}`
+    : 'http://auth-srv:3000';
 
   assert.strictEqual(
     findRewrite(rewrites, '/auth/login')?.destination,
-    'http://auth-srv:3000/auth/login'
+    `${authBaseUrl}/auth/login`
   );
   assert.strictEqual(
     findRewrite(rewrites, '/auth/logout')?.destination,
-    'http://auth-srv:3000/auth/logout'
+    `${authBaseUrl}/auth/logout`
   );
   assert.strictEqual(
     findRewrite(rewrites, '/auth/callback')?.destination,
-    'http://auth-srv:3000/auth/callback'
+    `${authBaseUrl}/auth/callback`
   );
 
   console.log('Auth0 client link smoke tests passed.');
