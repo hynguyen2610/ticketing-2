@@ -328,3 +328,15 @@ it('redirects through Auth0 logout when Auth0 logout env vars are configured', a
   );
   expect(response.get('Set-Cookie')).toBeDefined();
 });
+
+it('falls back to the app root during Auth0 logout when logout env vars are missing', async () => {
+  delete process.env.AUTH0_LOGOUT_REDIRECT_URL;
+
+  const response = await request(app)
+    .get('/auth/logout')
+    .send()
+    .expect(302);
+
+  expect(response.get('Location')).toEqual('/');
+  expect(response.get('Set-Cookie')).toBeDefined();
+});
