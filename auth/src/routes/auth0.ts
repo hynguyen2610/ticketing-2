@@ -149,7 +149,10 @@ router.get('/auth/callback', async (req, res, next) => {
     const tokenSet = await client.callback(
       process.env.AUTH0_CALLBACK_URL!,
       { code: code as string, state: state as string },
-      { code_verifier: session.auth0CodeVerifier }
+      {
+        code_verifier: session.auth0CodeVerifier,
+        state: session.auth0State,
+      }
     );
 
     const claims = tokenSet.claims();

@@ -292,7 +292,10 @@ it('creates a local user and session after a successful Auth0 callback', async (
   expect(mockCallback).toHaveBeenCalledWith(
     'http://localhost:3000/auth/callback',
     { code: 'auth-code', state: 'test-state' },
-    { code_verifier: 'test-code-verifier' }
+    {
+      code_verifier: 'test-code-verifier',
+      state: 'test-state',
+    }
   );
   expect(user).toBeDefined();
   expect(user!.auth0Sub).toEqual('auth0|123');
