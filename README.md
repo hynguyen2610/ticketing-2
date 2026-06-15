@@ -44,6 +44,12 @@ Check the live Kubernetes secret without printing secret values:
 scripts/check-auth0-secret.sh
 ```
 
+Run all Auth0 deployment checks:
+
+```sh
+scripts/check-auth0-secret.sh --all
+```
+
 After changing the secret, restart the auth deployment and verify the running
 pod picked up the values:
 

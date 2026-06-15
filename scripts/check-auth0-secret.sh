@@ -11,13 +11,14 @@ MODE="${1:-secret}"
 
 usage() {
   cat <<EOF
-Usage: $0 [secret|--pod-env]
+Usage: $0 [secret|--pod-env|--login-route|--all]
 
 Commands:
   secret     Check the Kubernetes auth0-secret object (default)
   --pod-env  Check the running auth pod environment
   --login-route
              Check /auth/login through a temporary auth service port-forward
+  --all      Run the secret, pod environment, and login route checks
 
 Environment variables:
   KUBECTL        Kubectl command to use (default: kubectl)
@@ -263,6 +264,17 @@ check_login_route() {
   esac
 }
 
+check_all() {
+  status=0
+  check_secret || status=1
+  echo
+  check_pod_env || status=1
+  echo
+  check_login_route || status=1
+
+  return "$status"
+}
+
 case "$MODE" in
   secret)
     check_secret
@@ -272,6 +284,9 @@ case "$MODE" in
     ;;
   --login-route)
     check_login_route
+    ;;
+  --all)
+    check_all
     ;;
   help|--help|-h)
     usage

@@ -115,6 +115,7 @@ system.
     Auth0 tenant/application values.
   - Verify without printing secret values by running
     `scripts/check-auth0-secret.sh`.
+  - Run all Auth0 deployment checks with `scripts/check-auth0-secret.sh --all`.
   - After updating the secret and restarting `auth-depl`, verify the running
     pod with `scripts/check-auth0-secret.sh --pod-env`.
 - [x] Confirm `JWT_KEY` still exists because the auth service still issues the
