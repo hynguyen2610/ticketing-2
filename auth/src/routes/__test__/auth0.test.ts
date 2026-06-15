@@ -142,6 +142,7 @@ it('redirects Auth0 callback errors to the error page with feedback details', as
     .set('Cookie', buildSessionCookie({
       auth0State: 'test-state',
       auth0CodeVerifier: 'test-code-verifier',
+      returnTo: '/orders',
     }))
     .send()
     .expect(302);
@@ -149,6 +150,12 @@ it('redirects Auth0 callback errors to the error page with feedback details', as
   expect(response.get('Location')).toEqual(
     '/auth/error?error=access_denied&error_description=User+cancelled+login'
   );
+  expect(response.get('Set-Cookie')).toBeDefined();
+
+  const session = readSessionCookie(response.get('Set-Cookie')!);
+  expect(session.auth0State).toBeUndefined();
+  expect(session.auth0CodeVerifier).toBeUndefined();
+  expect(session.returnTo).toEqual('/orders');
   expect(mockCallback).not.toHaveBeenCalled();
 });
 
