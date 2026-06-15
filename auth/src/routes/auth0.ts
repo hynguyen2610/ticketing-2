@@ -163,8 +163,12 @@ router.get('/auth/callback', async (req, res, next) => {
       process.env.JWT_KEY!
     );
 
+    const nextSession = { ...((req.session as any) || {}) };
+    delete nextSession.auth0State;
+    delete nextSession.auth0CodeVerifier;
+
     req.session = {
-      ...req.session,
+      ...nextSession,
       jwt: userJwt,
       auth0User: {
         id: user.id,

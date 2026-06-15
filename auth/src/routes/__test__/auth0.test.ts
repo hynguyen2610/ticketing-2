@@ -184,6 +184,8 @@ it('creates a local user and session after a successful Auth0 callback', async (
   });
   expect(session.auth0IdToken).toBeUndefined();
   expect(session.auth0AccessToken).toBeUndefined();
+  expect(session.auth0State).toBeUndefined();
+  expect(session.auth0CodeVerifier).toBeUndefined();
 });
 
 it('reuses an existing user matched by Auth0 subject when the email changes', async () => {
