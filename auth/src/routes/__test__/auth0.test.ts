@@ -285,6 +285,22 @@ it('rejects Auth0 callback when the email is linked to a different Auth0 subject
     .expect(400);
 });
 
+it('rejects Auth0 callback when the profile does not include an email', async () => {
+  mockClaims.mockReturnValue({
+    name: 'Auth0 Test User',
+    sub: 'auth0|123',
+  });
+
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(400);
+});
+
 it('rejects Auth0 callback when the profile does not include a subject', async () => {
   mockClaims.mockReturnValue({
     email: 'auth0@test.com',
