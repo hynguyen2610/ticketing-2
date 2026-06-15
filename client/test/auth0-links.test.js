@@ -1,0 +1,54 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+
+const rootDir = path.resolve(__dirname, '..');
+
+const readClientFile = (relativePath) => {
+  return fs.readFileSync(path.join(rootDir, relativePath), 'utf8');
+};
+
+const assertIncludes = (content, expected, label) => {
+  assert(
+    content.includes(expected),
+    `${label} should include ${expected}`
+  );
+};
+
+const findRewrite = (rewrites, source) => {
+  return rewrites.find((rewrite) => rewrite.source === source);
+};
+
+const run = async () => {
+  const signin = readClientFile('pages/auth/signin.js');
+  const signup = readClientFile('pages/auth/signup.js');
+  const signout = readClientFile('pages/auth/signout.js');
+
+  assertIncludes(signin, 'href="/auth/login"', 'signin page');
+  assertIncludes(signup, 'href="/auth/login?screen_hint=signup"', 'signup page');
+  assertIncludes(signout, "window.location.href = '/auth/logout'", 'signout page');
+
+  const nextConfig = require('../next.config');
+  const rewrites = await nextConfig.rewrites();
+
+  assert.strictEqual(
+    findRewrite(rewrites, '/auth/login')?.destination,
+    'http://auth-srv:3000/auth/login'
+  );
+  assert.strictEqual(
+    findRewrite(rewrites, '/auth/logout')?.destination,
+    'http://auth-srv:3000/auth/logout'
+  );
+  assert.strictEqual(
+    findRewrite(rewrites, '/auth/callback')?.destination,
+    'http://auth-srv:3000/auth/callback'
+  );
+
+  console.log('Auth0 client link smoke tests passed.');
+};
+
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+

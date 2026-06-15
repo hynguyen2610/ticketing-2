@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next"
+    "dev": "next",
+    "test:auth0-links": "node test/auth0-links.test.js"
   },
   "keywords": [],
   "author": "",

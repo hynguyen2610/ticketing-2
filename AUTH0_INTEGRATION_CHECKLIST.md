@@ -157,6 +157,10 @@ system.
 - [x] Client deployment does not need Auth0 env vars in the current
   auth-service redirect architecture.
 - [x] Client rewrites proxy `/auth/*` and `/api/*` to cluster service DNS names.
+- [x] Client Auth0 link smoke test can be run with:
+  ```sh
+  cd client && npm run test:auth0-links
+  ```
 - [ ] Verify Skaffold deploy succeeds when `auth0-secret`, `jwt-secret`, and
   `stripe-secret` already exist.
 - [ ] Verify local service port forwarding exposes the client at
@@ -186,7 +190,7 @@ system.
 ## 9. Test Plan
 
 - [x] Add auth service tests for Auth0 routes.
-- [ ] Add client smoke tests for signin/signup/signout links.
+- [x] Add client smoke tests for signin/signup/signout links.
 - [ ] Add an integration or e2e test path that can run with mocked Auth0.
 - [ ] Manually verify with a real Auth0 tenant before marking integration done.
 
