@@ -101,6 +101,8 @@ system.
   when an Auth0 API audience is configured.
 - [x] Add a safe script to verify the live Auth0 secret and auth pod
   environment without printing secret values.
+- [x] Add a safe script to apply the live Auth0 secret from environment
+  variables without writing real values into source control.
 - [x] Document the manual `kubectl create secret generic auth0-secret` command
   in `README.md`.
 - [ ] Create the real Kubernetes secret in the target cluster:
@@ -115,6 +117,8 @@ system.
     Auth0 tenant/application values.
   - Verify without printing secret values by running
     `scripts/check-auth0-secret.sh`.
+  - Apply real values without a committed manifest by exporting the Auth0 env
+    vars and running `scripts/apply-auth0-secret.sh`.
   - Run all Auth0 deployment checks with `scripts/check-auth0-secret.sh --all`.
   - After updating the secret and restarting `auth-depl`, verify the running
     pod with `scripts/check-auth0-secret.sh --pod-env`.
