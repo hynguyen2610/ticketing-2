@@ -105,10 +105,10 @@ system.
   - `AUTH0_CALLBACK_URL`
   - `AUTH0_LOGOUT_REDIRECT_URL`
   - `AUTH0_AUDIENCE`
-- [ ] Confirm `JWT_KEY` still exists because the auth service still issues the
+- [x] Confirm `JWT_KEY` still exists because the auth service still issues the
   internal JWT cookie after Auth0 login.
-- [ ] Decide how to manage local developer secrets outside source control.
-- [ ] Do not commit a real `infra/k8s-apps/auth0-secret.yaml`.
+- [x] Decide how to manage local developer secrets outside source control.
+- [x] Do not commit a real `infra/k8s-apps/auth0-secret.yaml`.
 
 ## 4. Client App Integration
 

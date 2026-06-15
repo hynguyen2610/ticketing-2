@@ -40,6 +40,11 @@ kubectl create secret generic auth0-secret \
 `AUTH0_AUDIENCE` is optional. If you deploy to a remote cluster host, replace the callback and logout URLs with the external app URL instead of `localhost`.
 
 > Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
+>
+> If you prefer a local manifest while developing, copy
+> `infra/k8s-apps/auth0-secret.example.yaml` to
+> `infra/k8s-apps/auth0-secret.yaml`, replace the placeholder values, and apply
+> that ignored file with `kubectl apply -f infra/k8s-apps/auth0-secret.yaml`.
 
 The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
 
