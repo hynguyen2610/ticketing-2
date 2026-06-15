@@ -19,6 +19,13 @@ const findRewrite = (rewrites, source) => {
   return rewrites.find((rewrite) => rewrite.source === source);
 };
 
+const loadNextConfig = () => {
+  const nextConfigPath = require.resolve('../next.config');
+  delete require.cache[nextConfigPath];
+
+  return require('../next.config');
+};
+
 const run = async () => {
   const signin = readClientFile('pages/auth/signin.js');
   const signup = readClientFile('pages/auth/signup.js');
@@ -36,7 +43,7 @@ const run = async () => {
   const auth0ErrorAlert = readClientFile('components/auth0-error-alert.js');
   assertIncludes(auth0ErrorAlert, 'Auth0 sign-in failed', 'Auth0 error alert');
 
-  const nextConfig = require('../next.config');
+  const nextConfig = loadNextConfig();
   const rewrites = await nextConfig.rewrites();
   const authBaseUrl = process.env.AUTH_SRV_SERVICE_HOST
     ? `http://${process.env.AUTH_SRV_SERVICE_HOST}:${process.env.AUTH_SRV_SERVICE_PORT || '3000'}`
@@ -54,6 +61,32 @@ const run = async () => {
     findRewrite(rewrites, '/auth/callback')?.destination,
     `${authBaseUrl}/auth/callback`
   );
+
+  const previousAuthHost = process.env.AUTH_SRV_SERVICE_HOST;
+  const previousAuthPort = process.env.AUTH_SRV_SERVICE_PORT;
+
+  process.env.AUTH_SRV_SERVICE_HOST = '10.96.0.10';
+  process.env.AUTH_SRV_SERVICE_PORT = '3000';
+
+  const envNextConfig = loadNextConfig();
+  const envRewrites = await envNextConfig.rewrites();
+
+  assert.strictEqual(
+    findRewrite(envRewrites, '/auth/login')?.destination,
+    'http://10.96.0.10:3000/auth/login'
+  );
+
+  if (previousAuthHost === undefined) {
+    delete process.env.AUTH_SRV_SERVICE_HOST;
+  } else {
+    process.env.AUTH_SRV_SERVICE_HOST = previousAuthHost;
+  }
+
+  if (previousAuthPort === undefined) {
+    delete process.env.AUTH_SRV_SERVICE_PORT;
+  } else {
+    process.env.AUTH_SRV_SERVICE_PORT = previousAuthPort;
+  }
 
   console.log('Auth0 client link smoke tests passed.');
 };

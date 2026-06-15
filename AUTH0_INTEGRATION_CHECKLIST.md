@@ -44,7 +44,8 @@ system.
 - [x] `client/pages/auth/signup.js` links to `/auth/login?screen_hint=signup`.
 - [x] `client/pages/auth/signout.js` redirects to `/auth/logout`.
 - [x] `client/next.config.js` rewrites `/auth/login`, `/auth/callback`, and
-  `/auth/logout` to `auth-srv`.
+  `/auth/logout` to the auth service using Kubernetes service env addresses
+  when available, with `auth-srv` as the local fallback.
 - [x] `infra/k8s-apps/auth-depl.yaml` reads Auth0 values from `auth0-secret`.
 - [x] `infra/k8s-apps/auth0-secret.example.yaml` exists as a placeholder
   template.
