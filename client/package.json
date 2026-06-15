@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "next",
-    "test:auth0-links": "node test/auth0-links.test.js"
+    "test:auth0-links": "node test/auth0-links.test.js",
+    "test:build-client": "node test/build-client.test.js"
   },
   "keywords": [],
   "author": "",

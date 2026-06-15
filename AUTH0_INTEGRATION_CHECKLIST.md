@@ -198,8 +198,14 @@ system.
     secret values.
   - Verify the deployed login route with
     `scripts/check-auth0-secret.sh --login-route`.
-- [ ] Verify local service port forwarding exposes the client at
-  `http://localhost:3000`.
+- [x] Verify local service port forwarding exposes the client.
+  - `kubectl port-forward svc/client-srv 13100:3000` served homepage,
+    sign-in, and sign-up pages with `200 OK`.
+  - `http://localhost:3000` is currently occupied by the image-management
+    frontend in this environment, so the verified ticketing client URL was
+    `http://127.0.0.1:13100`.
+  - Homepage now degrades to an empty ticket list instead of hanging when the
+    tickets service is temporarily unable to reach its backing services.
 - [ ] Verify remote cluster callback/logout URLs if not using localhost.
 
 ## 8. Local Verification
