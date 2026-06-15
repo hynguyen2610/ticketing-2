@@ -44,6 +44,15 @@ Check the live Kubernetes secret without printing secret values:
 scripts/check-auth0-secret.sh
 ```
 
+After changing the secret, restart the auth deployment and verify the running
+pod picked up the values:
+
+```sh
+kubectl rollout restart deploy/auth-depl
+kubectl rollout status deploy/auth-depl
+scripts/check-auth0-secret.sh --pod-env
+```
+
 > Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
 >
 > If you prefer a local manifest while developing, copy
