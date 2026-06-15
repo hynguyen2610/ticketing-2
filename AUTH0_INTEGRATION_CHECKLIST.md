@@ -168,6 +168,8 @@ system.
 ## 7. Deployment And Skaffold Workflow
 
 - [x] Auth deployment references `auth0-secret`.
+- [x] Applied the current auth deployment manifest with optional
+  `AUTH0_AUDIENCE`.
 - [x] Client deployment does not need Auth0 env vars in the current
   auth-service redirect architecture.
 - [x] Client rewrites proxy `/auth/*` and `/api/*` to cluster service DNS names.
@@ -181,6 +183,9 @@ system.
   ```
 - [ ] Verify Skaffold deploy succeeds when `auth0-secret`, `jwt-secret`, and
   `stripe-secret` already exist.
+  - Current live `auth-depl` rolled out successfully, but `/auth/login` returns
+    404 through `auth-srv`, so the deployed image does not yet include the local
+    Auth0 routes and needs to be rebuilt/redeployed before runtime verification.
 - [ ] Verify local service port forwarding exposes the client at
   `http://localhost:3000`.
 - [ ] Verify remote cluster callback/logout URLs if not using localhost.
