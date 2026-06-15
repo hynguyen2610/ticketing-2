@@ -151,7 +151,7 @@ skaffold dev \
   --profile cluster-registry \
   --default-repo 100.114.61.78:30500/ticketing \
   --insecure-registry 100.114.61.78:30500 \
-  --port-forward=services
+  --port-forward=user
 ```
 
 Or use the helper script:
