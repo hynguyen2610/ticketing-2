@@ -160,7 +160,8 @@ Or use the helper script:
 scripts/dev.sh
 ```
 
-On success, Skaffold will forward service ports for the frontend apps to localhost.
+On success, Skaffold will forward the ticketing client to
+`http://127.0.0.1:13100`.
 
 > This project is using a remote cluster registry, so `skaffold dev` must push images to `100.114.61.78:30500/ticketing` before deployments can start.
 

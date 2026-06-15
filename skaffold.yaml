@@ -4,6 +4,11 @@ deploy:
   kubectl:
     manifests:
       - ./infra/k8s-apps/*
+portForward:
+  - resourceType: service
+    resourceName: client-srv
+    port: 3000
+    localPort: 13100
 build:
   tagPolicy:
     gitCommit: {}
