@@ -141,7 +141,7 @@ system.
 ## 6. Backend Service Token Strategy
 
 - [x] Continue using internal `JWT_KEY`-signed cookies for existing services.
-- [ ] If keeping this strategy, document that backend services trust only the
+- [x] If keeping this strategy, document that backend services trust only the
   auth service's internal JWT, not raw Auth0 tokens.
 - [ ] If migrating to direct Auth0 validation:
   - Add Auth0 JWT validation middleware to a shared package.

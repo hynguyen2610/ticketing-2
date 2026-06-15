@@ -43,6 +43,15 @@ kubectl create secret generic auth0-secret \
 
 The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
 
+### Auth token strategy
+
+Auth0 is currently integrated at the auth service boundary. After a successful
+Auth0 login, the auth service still issues the existing internal session cookie
+containing a `JWT_KEY`-signed JWT. Backend services such as tickets, orders,
+payment, and image management continue to trust only that internal JWT through
+the shared `currentUser` middleware; they do not validate raw Auth0 ID or access
+tokens directly.
+
 ### Deploy system infrastructure
 
 ```sh
