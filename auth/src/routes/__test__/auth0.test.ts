@@ -103,6 +103,21 @@ it('redirects to Auth0 and stores PKCE state in the session', async () => {
   expect(session.auth0State).toEqual('test-state');
 });
 
+it('preserves unrelated session data when starting Auth0 login', async () => {
+  const response = await request(app)
+    .get('/auth/login')
+    .set('Cookie', buildSessionCookie({
+      returnTo: '/orders',
+    }))
+    .send()
+    .expect(302);
+
+  const session = readSessionCookie(response.get('Set-Cookie')!);
+  expect(session.returnTo).toEqual('/orders');
+  expect(session.auth0CodeVerifier).toEqual('test-code-verifier');
+  expect(session.auth0State).toEqual('test-state');
+});
+
 it('rejects Auth0 login when required Auth0 env vars are missing', async () => {
   delete process.env.AUTH0_DOMAIN;
 
@@ -112,6 +127,17 @@ it('rejects Auth0 login when required Auth0 env vars are missing', async () => {
     .expect(400);
 
   expect(Issuer.discover).not.toHaveBeenCalled();
+});
+
+it('rejects Auth0 login when the callback URL is missing', async () => {
+  delete process.env.AUTH0_CALLBACK_URL;
+
+  await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(400);
+
+  expect(mockAuthorizationUrl).not.toHaveBeenCalled();
 });
 
 it('omits Auth0 audience from login options when it is not configured', async () => {
@@ -140,6 +166,31 @@ it('passes the Auth0 signup screen hint when requested', async () => {
       screen_hint: 'signup',
     })
   );
+});
+
+it.each([
+  ['code is missing', '/auth/callback?state=test-state', {
+    auth0State: 'test-state',
+    auth0CodeVerifier: 'test-code-verifier',
+  }],
+  ['state is missing', '/auth/callback?code=auth-code', {
+    auth0State: 'test-state',
+    auth0CodeVerifier: 'test-code-verifier',
+  }],
+  ['session state is missing', '/auth/callback?code=auth-code&state=test-state', {
+    auth0CodeVerifier: 'test-code-verifier',
+  }],
+  ['session code verifier is missing', '/auth/callback?code=auth-code&state=test-state', {
+    auth0State: 'test-state',
+  }],
+])('rejects callback requests when %s', async (_label, url, session) => {
+  await request(app)
+    .get(url)
+    .set('Cookie', buildSessionCookie(session))
+    .send()
+    .expect(400);
+
+  expect(mockCallback).not.toHaveBeenCalled();
 });
 
 it('rejects callback requests with mismatched state', async () => {
@@ -184,6 +235,7 @@ it('creates a local user and session after a successful Auth0 callback', async (
     .set('Cookie', buildSessionCookie({
       auth0State: 'test-state',
       auth0CodeVerifier: 'test-code-verifier',
+      returnTo: '/orders',
     }))
     .send()
     .expect(302);
@@ -212,6 +264,7 @@ it('creates a local user and session after a successful Auth0 callback', async (
   expect(session.auth0AccessToken).toBeUndefined();
   expect(session.auth0State).toBeUndefined();
   expect(session.auth0CodeVerifier).toBeUndefined();
+  expect(session.returnTo).toEqual('/orders');
 });
 
 it('reuses an existing user matched by Auth0 subject when the email changes', async () => {
@@ -316,10 +369,44 @@ it('rejects Auth0 callback when the profile does not include an email', async ()
     .expect(400);
 });
 
+it('rejects Auth0 callback when the profile email is not a string', async () => {
+  mockClaims.mockReturnValue({
+    email: ['auth0@test.com'],
+    name: 'Auth0 Test User',
+    sub: 'auth0|123',
+  });
+
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(400);
+});
+
 it('rejects Auth0 callback when the profile does not include a subject', async () => {
   mockClaims.mockReturnValue({
     email: 'auth0@test.com',
     name: 'Auth0 Test User',
+  });
+
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(400);
+});
+
+it('rejects Auth0 callback when the profile subject is not a string', async () => {
+  mockClaims.mockReturnValue({
+    email: 'auth0@test.com',
+    name: 'Auth0 Test User',
+    sub: ['auth0|123'],
   });
 
   await request(app)
