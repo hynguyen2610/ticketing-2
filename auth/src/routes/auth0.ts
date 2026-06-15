@@ -58,6 +58,13 @@ const buildAuthUrlOptions = (screenHint?: string) => {
   return options;
 };
 
+const clearAuth0HandshakeSession = (session: Record<string, unknown> = {}) => {
+  const nextSession = { ...session };
+  delete nextSession.auth0State;
+  delete nextSession.auth0CodeVerifier;
+  return nextSession;
+};
+
 router.get('/auth/login', async (req, res, next) => {
   try {
     const client = await getAuth0Client();
@@ -90,10 +97,7 @@ router.get('/auth/login', async (req, res, next) => {
 router.get('/auth/callback', async (req, res, next) => {
   try {
     if (req.query.error) {
-      const session = { ...((req.session as any) || {}) };
-      delete session.auth0State;
-      delete session.auth0CodeVerifier;
-      req.session = session;
+      req.session = clearAuth0HandshakeSession(req.session as any);
 
       const params = new URLSearchParams({
         error: req.query.error as string,
@@ -163,12 +167,8 @@ router.get('/auth/callback', async (req, res, next) => {
       process.env.JWT_KEY!
     );
 
-    const nextSession = { ...((req.session as any) || {}) };
-    delete nextSession.auth0State;
-    delete nextSession.auth0CodeVerifier;
-
     req.session = {
-      ...nextSession,
+      ...clearAuth0HandshakeSession(req.session as any),
       jwt: userJwt,
       auth0User: {
         id: user.id,
