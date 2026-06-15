@@ -97,6 +97,8 @@ system.
 
 - [x] Add Auth0 secret references to `infra/k8s-apps/auth-depl.yaml`.
 - [x] Add `infra/k8s-apps/auth0-secret.example.yaml` as a safe placeholder.
+- [x] Make `AUTH0_AUDIENCE` optional in Kubernetes because it is only needed
+  when an Auth0 API audience is configured.
 - [x] Document the manual `kubectl create secret generic auth0-secret` command
   in `README.md`.
 - [ ] Create the real Kubernetes secret in the target cluster:

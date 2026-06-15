@@ -31,13 +31,12 @@ kubectl create secret generic auth0-secret \
   --from-literal=AUTH0_CLIENT_ID=<your-auth0-client-id> \
   --from-literal=AUTH0_CLIENT_SECRET=<your-auth0-client-secret> \
   --from-literal=AUTH0_CALLBACK_URL=http://localhost:3000/auth/callback \
-  --from-literal=AUTH0_LOGOUT_REDIRECT_URL=http://localhost:3000 \
-  --from-literal=AUTH0_AUDIENCE=<your-auth0-audience>
+  --from-literal=AUTH0_LOGOUT_REDIRECT_URL=http://localhost:3000
 ```
 
 `AUTH0_DOMAIN` should be the tenant domain only, for example `dev-xxxxx.us.auth0.com`. Do not use the Auth0 dashboard URL.
 
-`AUTH0_AUDIENCE` is optional. If you deploy to a remote cluster host, replace the callback and logout URLs with the external app URL instead of `localhost`.
+`AUTH0_AUDIENCE` is optional. Add `--from-literal=AUTH0_AUDIENCE=<your-auth0-audience>` only if you configured an Auth0 API audience. If you deploy to a remote cluster host, replace the callback and logout URLs with the external app URL instead of `localhost`.
 
 > Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
 >
