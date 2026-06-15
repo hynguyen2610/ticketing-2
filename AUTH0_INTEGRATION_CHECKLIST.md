@@ -205,6 +205,6 @@ system.
 - [ ] Add roles or permissions in Auth0 for admin vs regular users.
 - [ ] Add an Auth0 Action to populate custom claims.
 - [ ] Add organization support if needed.
-- [ ] Add a dedicated callback error page.
+- [x] Add a dedicated callback error page.
 - [x] Reduce cookie size by avoiding storage of raw Auth0 tokens in the session
   unless they are actually needed.

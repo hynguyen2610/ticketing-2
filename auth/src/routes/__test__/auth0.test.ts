@@ -136,7 +136,7 @@ it('rejects callback requests with mismatched state', async () => {
   expect(mockCallback).not.toHaveBeenCalled();
 });
 
-it('redirects Auth0 callback errors back to the sign-in page with feedback details', async () => {
+it('redirects Auth0 callback errors to the error page with feedback details', async () => {
   const response = await request(app)
     .get('/auth/callback?error=access_denied&error_description=User%20cancelled%20login')
     .set('Cookie', buildSessionCookie({
@@ -147,7 +147,7 @@ it('redirects Auth0 callback errors back to the sign-in page with feedback detai
     .expect(302);
 
   expect(response.get('Location')).toEqual(
-    '/auth/signin?error=access_denied&error_description=User+cancelled+login'
+    '/auth/error?error=access_denied&error_description=User+cancelled+login'
   );
   expect(mockCallback).not.toHaveBeenCalled();
 });

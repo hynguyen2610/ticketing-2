@@ -23,12 +23,15 @@ const run = async () => {
   const signin = readClientFile('pages/auth/signin.js');
   const signup = readClientFile('pages/auth/signup.js');
   const signout = readClientFile('pages/auth/signout.js');
+  const authError = readClientFile('pages/auth/error.js');
 
   assertIncludes(signin, 'href="/auth/login"', 'signin page');
   assertIncludes(signin, '<Auth0ErrorAlert query={query} />', 'signin page');
   assertIncludes(signup, 'href="/auth/login?screen_hint=signup"', 'signup page');
   assertIncludes(signup, '<Auth0ErrorAlert query={query} />', 'signup page');
   assertIncludes(signout, "window.location.href = '/auth/logout'", 'signout page');
+  assertIncludes(authError, '<Auth0ErrorAlert query={query} />', 'Auth0 error page');
+  assertIncludes(authError, 'href="/auth/signin"', 'Auth0 error page');
 
   const auth0ErrorAlert = readClientFile('components/auth0-error-alert.js');
   assertIncludes(auth0ErrorAlert, 'Auth0 sign-in failed', 'Auth0 error alert');

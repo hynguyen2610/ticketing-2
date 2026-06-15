@@ -103,7 +103,7 @@ router.get('/auth/callback', async (req, res, next) => {
         params.set('error_description', req.query.error_description as string);
       }
 
-      return res.redirect(`/auth/signin?${params.toString()}`);
+      return res.redirect(`/auth/error?${params.toString()}`);
     }
 
     const { code, state } = req.query;
