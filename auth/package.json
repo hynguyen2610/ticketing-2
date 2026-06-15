@@ -6,7 +6,8 @@
   "scripts": {
     "start": "ts-node-dev --poll src/index.ts",
     "test": "jest --watchAll --no-cache",
-    "test:ci": "jest"
+    "test:ci": "jest",
+    "test:auth0-flow": "jest src/routes/__test__/auth0.test.ts src/routes/__test__/current-user.test.ts src/routes/__test__/signout.test.ts --runInBand"
   },
   "jest": {
     "preset": "ts-jest",

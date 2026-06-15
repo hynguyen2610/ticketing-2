@@ -64,6 +64,17 @@ payment, and image management continue to trust only that internal JWT through
 the shared `currentUser` middleware; they do not validate raw Auth0 ID or access
 tokens directly.
 
+### Auth0 test path
+
+Run the mocked Auth0 service flow tests with:
+
+```sh
+cd auth && npm run test:auth0-flow
+```
+
+This exercises the Auth0 login/callback/logout routes with `openid-client`
+mocked, plus current-user and signout behavior for the internal session.
+
 ### Deploy system infrastructure
 
 ```sh

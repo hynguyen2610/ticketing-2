@@ -162,6 +162,10 @@ system.
   ```sh
   cd client && npm run test:auth0-links
   ```
+- [x] Mocked auth service Auth0 flow test can be run with:
+  ```sh
+  cd auth && npm run test:auth0-flow
+  ```
 - [ ] Verify Skaffold deploy succeeds when `auth0-secret`, `jwt-secret`, and
   `stripe-secret` already exist.
 - [ ] Verify local service port forwarding exposes the client at
@@ -192,7 +196,7 @@ system.
 
 - [x] Add auth service tests for Auth0 routes.
 - [x] Add client smoke tests for signin/signup/signout links.
-- [ ] Add an integration or e2e test path that can run with mocked Auth0.
+- [x] Add an integration or e2e test path that can run with mocked Auth0.
 - [ ] Manually verify with a real Auth0 tenant before marking integration done.
 
 ## 10. Optional Improvements
