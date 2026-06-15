@@ -114,6 +114,21 @@ it('rejects Auth0 login when required Auth0 env vars are missing', async () => {
   expect(Issuer.discover).not.toHaveBeenCalled();
 });
 
+it('omits Auth0 audience from login options when it is not configured', async () => {
+  delete process.env.AUTH0_AUDIENCE;
+
+  await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(302);
+
+  expect(mockAuthorizationUrl).toHaveBeenCalledWith(
+    expect.not.objectContaining({
+      audience: expect.anything(),
+    })
+  );
+});
+
 it('passes the Auth0 signup screen hint when requested', async () => {
   await request(app)
     .get('/auth/login?screen_hint=signup')
