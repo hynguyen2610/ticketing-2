@@ -183,9 +183,12 @@ system.
   ```
 - [ ] Verify Skaffold deploy succeeds when `auth0-secret`, `jwt-secret`, and
   `stripe-secret` already exist.
-  - Current live `auth-depl` rolled out successfully, but `/auth/login` returns
-    404 through `auth-srv`, so the deployed image does not yet include the local
-    Auth0 routes and needs to be rebuilt/redeployed before runtime verification.
+  - Built and pushed the auth image with Skaffold:
+    `100.114.61.78:30500/ticketing/bluestorm1288_ticketing-auth:1218c8f`.
+  - Updated `auth-depl` to the rebuilt image and rollout succeeded.
+  - `/auth/login` now reaches the Auth0 route through `auth-srv`; it returns
+    the expected 400 until real Auth0 tenant values replace the placeholder
+    secret values.
 - [ ] Verify local service port forwarding exposes the client at
   `http://localhost:3000`.
 - [ ] Verify remote cluster callback/logout URLs if not using localhost.
