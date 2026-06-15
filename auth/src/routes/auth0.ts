@@ -8,6 +8,16 @@ const router = express.Router();
 let auth0Client: Client | undefined;
 let auth0ClientConfigKey: string | undefined;
 
+const isPlaceholderAuth0Value = (value?: string) => {
+  return !!value && value.startsWith('YOUR_AUTH0_');
+};
+
+const assertRealAuth0Value = (name: string, value: string) => {
+  if (isPlaceholderAuth0Value(value)) {
+    throw new BadRequestError(`${name} must be configured with a real Auth0 value`);
+  }
+};
+
 const getAuth0Client = async () => {
   const {
     AUTH0_DOMAIN,
@@ -18,6 +28,9 @@ const getAuth0Client = async () => {
   if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID || !AUTH0_CLIENT_SECRET) {
     throw new BadRequestError('Auth0 environment variables are required for Auth0 login routes');
   }
+  assertRealAuth0Value('AUTH0_DOMAIN', AUTH0_DOMAIN);
+  assertRealAuth0Value('AUTH0_CLIENT_ID', AUTH0_CLIENT_ID);
+  assertRealAuth0Value('AUTH0_CLIENT_SECRET', AUTH0_CLIENT_SECRET);
 
   const configKey = `${AUTH0_DOMAIN}:${AUTH0_CLIENT_ID}:${AUTH0_CLIENT_SECRET}`;
   if (auth0Client && auth0ClientConfigKey === configKey) {
@@ -43,6 +56,10 @@ const buildAuthUrlOptions = (screenHint?: string) => {
   if (!AUTH0_CALLBACK_URL) {
     throw new BadRequestError('AUTH0_CALLBACK_URL must be defined for Auth0 login flow');
   }
+  assertRealAuth0Value('AUTH0_CALLBACK_URL', AUTH0_CALLBACK_URL);
+  if (AUTH0_AUDIENCE) {
+    assertRealAuth0Value('AUTH0_AUDIENCE', AUTH0_AUDIENCE);
+  }
 
   const options: Record<string, unknown> = {
     scope: 'openid profile email',
@@ -67,11 +84,12 @@ const clearAuth0HandshakeSession = (session: Record<string, unknown> = {}) => {
 
 router.get('/auth/login', async (req, res, next) => {
   try {
+    const screenHint = req.query.screen_hint === 'signup' ? 'signup' : undefined;
+    const options = buildAuthUrlOptions(screenHint);
     const client = await getAuth0Client();
     const codeVerifier = generators.codeVerifier();
     const codeChallenge = generators.codeChallenge(codeVerifier);
     const state = generators.random();
-    const screenHint = req.query.screen_hint === 'signup' ? 'signup' : undefined;
     const sessionData = req.session || {};
 
     req.session = {
@@ -80,7 +98,6 @@ router.get('/auth/login', async (req, res, next) => {
       auth0State: state,
     };
 
-    const options = buildAuthUrlOptions(screenHint);
     const authUrl = client.authorizationUrl({
       ...options,
       code_challenge: codeChallenge,
@@ -193,7 +210,14 @@ router.get('/auth/logout', (req, res) => {
     AUTH0_LOGOUT_REDIRECT_URL,
   } = process.env;
 
-  if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID || !AUTH0_LOGOUT_REDIRECT_URL) {
+  if (
+    !AUTH0_DOMAIN ||
+    !AUTH0_CLIENT_ID ||
+    !AUTH0_LOGOUT_REDIRECT_URL ||
+    isPlaceholderAuth0Value(AUTH0_DOMAIN) ||
+    isPlaceholderAuth0Value(AUTH0_CLIENT_ID) ||
+    isPlaceholderAuth0Value(AUTH0_LOGOUT_REDIRECT_URL)
+  ) {
     return res.redirect('/');
   }
 

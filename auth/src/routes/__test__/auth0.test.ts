@@ -129,6 +129,17 @@ it('rejects Auth0 login when required Auth0 env vars are missing', async () => {
   expect(Issuer.discover).not.toHaveBeenCalled();
 });
 
+it('rejects Auth0 login when required Auth0 env vars still use placeholder values', async () => {
+  process.env.AUTH0_DOMAIN = 'YOUR_AUTH0_DOMAIN';
+
+  await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(400);
+
+  expect(Issuer.discover).not.toHaveBeenCalled();
+});
+
 it('rejects Auth0 login when the callback URL is missing', async () => {
   delete process.env.AUTH0_CALLBACK_URL;
 
@@ -137,6 +148,19 @@ it('rejects Auth0 login when the callback URL is missing', async () => {
     .send()
     .expect(400);
 
+  expect(Issuer.discover).not.toHaveBeenCalled();
+  expect(mockAuthorizationUrl).not.toHaveBeenCalled();
+});
+
+it('rejects Auth0 login when the callback URL still uses a placeholder value', async () => {
+  process.env.AUTH0_CALLBACK_URL = 'YOUR_AUTH0_CALLBACK_URL';
+
+  await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(400);
+
+  expect(Issuer.discover).not.toHaveBeenCalled();
   expect(mockAuthorizationUrl).not.toHaveBeenCalled();
 });
 
@@ -153,6 +177,18 @@ it('omits Auth0 audience from login options when it is not configured', async ()
       audience: expect.anything(),
     })
   );
+});
+
+it('rejects Auth0 login when the audience still uses a placeholder value', async () => {
+  process.env.AUTH0_AUDIENCE = 'YOUR_AUTH0_AUDIENCE';
+
+  await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(400);
+
+  expect(Issuer.discover).not.toHaveBeenCalled();
+  expect(mockAuthorizationUrl).not.toHaveBeenCalled();
 });
 
 it('passes the Auth0 signup screen hint when requested', async () => {
@@ -433,6 +469,18 @@ it('redirects through Auth0 logout when Auth0 logout env vars are configured', a
 
 it('falls back to the app root during Auth0 logout when logout env vars are missing', async () => {
   delete process.env.AUTH0_LOGOUT_REDIRECT_URL;
+
+  const response = await request(app)
+    .get('/auth/logout')
+    .send()
+    .expect(302);
+
+  expect(response.get('Location')).toEqual('/');
+  expect(response.get('Set-Cookie')).toBeDefined();
+});
+
+it('falls back to the app root during Auth0 logout when logout env vars use placeholders', async () => {
+  process.env.AUTH0_DOMAIN = 'YOUR_AUTH0_DOMAIN';
 
   const response = await request(app)
     .get('/auth/logout')

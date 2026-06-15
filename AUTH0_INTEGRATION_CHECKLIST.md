@@ -138,6 +138,8 @@ system.
 - [x] Add automated tests for callback state mismatch.
 - [x] Add automated tests for successful Auth0 callback using mocked
   `openid-client`.
+- [x] Reject Auth0 placeholder secret values such as `YOUR_AUTH0_DOMAIN` before
+  attempting Auth0 discovery or authorization redirects.
 - [x] Store a stable Auth0 subject (`sub`) on the local user model instead of
   linking only by email.
 - [x] Confirm local `/api/users/signout` clears Auth0 session metadata.
