@@ -53,6 +53,12 @@ kubectl rollout status deploy/auth-depl
 scripts/check-auth0-secret.sh --pod-env
 ```
 
+Check that the deployed auth service exposes `/auth/login`:
+
+```sh
+scripts/check-auth0-secret.sh --login-route
+```
+
 > Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
 >
 > If you prefer a local manifest while developing, copy
