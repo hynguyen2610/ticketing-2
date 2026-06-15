@@ -34,8 +34,6 @@ system.
 - [x] Auth0 callback reads ID token claims, requires an email, creates or finds
   the local user, and stores:
   - existing internal `jwt`
-  - `auth0IdToken`
-  - `auth0AccessToken`
   - `auth0User`
 - [x] `auth/src/routes/current-user.ts` can return either the internal JWT user
   or `auth0User` from the session.
@@ -55,10 +53,9 @@ system.
   - Current behavior intentionally depends on the auth service OIDC flow.
 - [ ] Backend services do not validate Auth0-issued access tokens directly.
   - They still validate the internal JWT cookie signed by `JWT_KEY`.
-- [ ] Auth0 ID/access tokens stored in the cookie session are not used by other
-  services yet.
-- [ ] No automated tests cover `/auth/login`, `/auth/callback`, `/auth/logout`,
-  or Auth0 current-user behavior.
+- [x] Auth0 ID/access tokens are not stored in the browser cookie session.
+- [x] Automated auth service tests cover `/auth/login`, `/auth/callback`,
+  `/auth/logout`, and Auth0 current-user behavior.
 - [ ] No runtime verification has confirmed a real Auth0 tenant can complete
   login/logout against the local Kubernetes workflow.
 
@@ -131,9 +128,9 @@ system.
   `/api/users/signout` routes for local fallback/backward compatibility.
 - [x] Create or find local users by Auth0 email during callback.
 - [x] Issue the existing internal JWT cookie after successful Auth0 callback.
-- [ ] Add automated tests for missing Auth0 env vars.
-- [ ] Add automated tests for callback state mismatch.
-- [ ] Add automated tests for successful Auth0 callback using mocked
+- [x] Add automated tests for missing Auth0 env vars.
+- [x] Add automated tests for callback state mismatch.
+- [x] Add automated tests for successful Auth0 callback using mocked
   `openid-client`.
 - [ ] Consider storing a stable Auth0 subject (`sub`) on the local user model
   instead of linking only by email.
@@ -186,7 +183,7 @@ system.
 
 ## 9. Test Plan
 
-- [ ] Add auth service tests for Auth0 routes.
+- [x] Add auth service tests for Auth0 routes.
 - [ ] Add client smoke tests for signin/signup/signout links.
 - [ ] Add an integration or e2e test path that can run with mocked Auth0.
 - [ ] Manually verify with a real Auth0 tenant before marking integration done.
@@ -198,6 +195,5 @@ system.
 - [ ] Add an Auth0 Action to populate custom claims.
 - [ ] Add organization support if needed.
 - [ ] Add a dedicated callback error page.
-- [ ] Reduce cookie size by avoiding storage of raw Auth0 tokens in the session
+- [x] Reduce cookie size by avoiding storage of raw Auth0 tokens in the session
   unless they are actually needed.
-

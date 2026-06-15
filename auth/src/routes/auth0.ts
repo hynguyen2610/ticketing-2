@@ -6,12 +6,9 @@ import { User } from '../models/user';
 
 const router = express.Router();
 let auth0Client: Client | undefined;
+let auth0ClientConfigKey: string | undefined;
 
 const getAuth0Client = async () => {
-  if (auth0Client) {
-    return auth0Client;
-  }
-
   const {
     AUTH0_DOMAIN,
     AUTH0_CLIENT_ID,
@@ -19,7 +16,12 @@ const getAuth0Client = async () => {
   } = process.env;
 
   if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID || !AUTH0_CLIENT_SECRET) {
-    throw new Error('Auth0 environment variables are required for Auth0 login routes');
+    throw new BadRequestError('Auth0 environment variables are required for Auth0 login routes');
+  }
+
+  const configKey = `${AUTH0_DOMAIN}:${AUTH0_CLIENT_ID}:${AUTH0_CLIENT_SECRET}`;
+  if (auth0Client && auth0ClientConfigKey === configKey) {
+    return auth0Client;
   }
 
   const issuer = await Issuer.discover(`https://${AUTH0_DOMAIN}`);
@@ -27,6 +29,7 @@ const getAuth0Client = async () => {
     client_id: AUTH0_CLIENT_ID,
     client_secret: AUTH0_CLIENT_SECRET,
   });
+  auth0ClientConfigKey = configKey;
 
   return auth0Client;
 };
@@ -38,7 +41,7 @@ const buildAuthUrlOptions = (screenHint?: string) => {
   } = process.env;
 
   if (!AUTH0_CALLBACK_URL) {
-    throw new Error('AUTH0_CALLBACK_URL must be defined for Auth0 login flow');
+    throw new BadRequestError('AUTH0_CALLBACK_URL must be defined for Auth0 login flow');
   }
 
   const options: Record<string, unknown> = {
@@ -126,8 +129,6 @@ router.get('/auth/callback', async (req, res, next) => {
     req.session = {
       ...req.session,
       jwt: userJwt,
-      auth0IdToken: tokenSet.id_token,
-      auth0AccessToken: tokenSet.access_token,
       auth0User: {
         id: user.id,
         email,

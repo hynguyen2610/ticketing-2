@@ -1,0 +1,180 @@
+import request from 'supertest';
+import { app } from '../../app';
+import { User } from '../../models/user';
+import { Issuer, generators } from 'openid-client';
+
+const mockAuthorizationUrl = jest.fn();
+const mockCallback = jest.fn();
+const mockClientConstructor = jest.fn();
+
+jest.mock('openid-client', () => ({
+  Issuer: {
+    discover: jest.fn(),
+  },
+  generators: {
+    codeVerifier: jest.fn(),
+    codeChallenge: jest.fn(),
+    random: jest.fn(),
+  },
+}));
+
+const buildSessionCookie = (session: Record<string, unknown>) => {
+  const sessionJSON = JSON.stringify(session);
+  const base64 = Buffer.from(sessionJSON).toString('base64');
+  return [`session=${base64}`];
+};
+
+const readSessionCookie = (cookies: string[]) => {
+  const sessionCookie = cookies
+    .find((cookie) => cookie.startsWith('session='))
+    ?.split(';')[0]
+    .replace('session=', '');
+
+  if (!sessionCookie) {
+    throw new Error('Expected session cookie to be set');
+  }
+
+  return JSON.parse(Buffer.from(decodeURIComponent(sessionCookie), 'base64').toString('utf8'));
+};
+
+beforeEach(() => {
+  process.env.AUTH0_DOMAIN = 'dev-example.us.auth0.com';
+  process.env.AUTH0_CLIENT_ID = 'auth0-client-id';
+  process.env.AUTH0_CLIENT_SECRET = 'auth0-client-secret';
+  process.env.AUTH0_CALLBACK_URL = 'http://localhost:3000/auth/callback';
+  process.env.AUTH0_LOGOUT_REDIRECT_URL = 'http://localhost:3000';
+  process.env.AUTH0_AUDIENCE = 'https://ticketing.example.test';
+
+  mockAuthorizationUrl.mockReturnValue('https://dev-example.us.auth0.com/authorize');
+  mockCallback.mockResolvedValue({
+    id_token: 'auth0-id-token',
+    access_token: 'auth0-access-token',
+    claims: () => ({
+      email: 'auth0@test.com',
+      name: 'Auth0 Test User',
+      sub: 'auth0|123',
+    }),
+  });
+  mockClientConstructor.mockReturnValue({
+    authorizationUrl: mockAuthorizationUrl,
+    callback: mockCallback,
+  });
+
+  (Issuer.discover as jest.Mock).mockResolvedValue({
+    Client: mockClientConstructor,
+  });
+  (generators.codeVerifier as jest.Mock).mockReturnValue('test-code-verifier');
+  (generators.codeChallenge as jest.Mock).mockReturnValue('test-code-challenge');
+  (generators.random as jest.Mock).mockReturnValue('test-state');
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
+it('redirects to Auth0 and stores PKCE state in the session', async () => {
+  const response = await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(302);
+
+  expect(Issuer.discover).toHaveBeenCalledWith('https://dev-example.us.auth0.com');
+  expect(mockClientConstructor).toHaveBeenCalledWith({
+    client_id: 'auth0-client-id',
+    client_secret: 'auth0-client-secret',
+  });
+  expect(mockAuthorizationUrl).toHaveBeenCalledWith({
+    scope: 'openid profile email',
+    response_type: 'code',
+    redirect_uri: 'http://localhost:3000/auth/callback',
+    screen_hint: undefined,
+    audience: 'https://ticketing.example.test',
+    code_challenge: 'test-code-challenge',
+    code_challenge_method: 'S256',
+    state: 'test-state',
+  });
+  expect(response.get('Location')).toEqual('https://dev-example.us.auth0.com/authorize');
+  expect(response.get('Set-Cookie')).toBeDefined();
+});
+
+it('rejects Auth0 login when required Auth0 env vars are missing', async () => {
+  delete process.env.AUTH0_DOMAIN;
+
+  await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(400);
+
+  expect(Issuer.discover).not.toHaveBeenCalled();
+});
+
+it('passes the Auth0 signup screen hint when requested', async () => {
+  await request(app)
+    .get('/auth/login?screen_hint=signup')
+    .send()
+    .expect(302);
+
+  expect(mockAuthorizationUrl).toHaveBeenCalledWith(
+    expect.objectContaining({
+      screen_hint: 'signup',
+    })
+  );
+});
+
+it('rejects callback requests with mismatched state', async () => {
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=wrong-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(400);
+
+  expect(mockCallback).not.toHaveBeenCalled();
+});
+
+it('creates a local user and session after a successful Auth0 callback', async () => {
+  const response = await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(302);
+
+  const user = await User.findOne({ email: 'auth0@test.com' });
+
+  expect(mockCallback).toHaveBeenCalledWith(
+    'http://localhost:3000/auth/callback',
+    { code: 'auth-code', state: 'test-state' },
+    { code_verifier: 'test-code-verifier' }
+  );
+  expect(user).toBeDefined();
+  expect(response.get('Location')).toEqual('/');
+  expect(response.get('Set-Cookie')).toBeDefined();
+
+  const session = readSessionCookie(response.get('Set-Cookie')!);
+  expect(session.jwt).toBeDefined();
+  expect(session.auth0User).toEqual({
+    id: user!.id,
+    email: 'auth0@test.com',
+    name: 'Auth0 Test User',
+    sub: 'auth0|123',
+  });
+  expect(session.auth0IdToken).toBeUndefined();
+  expect(session.auth0AccessToken).toBeUndefined();
+});
+
+it('redirects through Auth0 logout when Auth0 logout env vars are configured', async () => {
+  const response = await request(app)
+    .get('/auth/logout')
+    .send()
+    .expect(302);
+
+  expect(response.get('Location')).toEqual(
+    'https://dev-example.us.auth0.com/v2/logout?client_id=auth0-client-id&returnTo=http%3A%2F%2Flocalhost%3A3000'
+  );
+  expect(response.get('Set-Cookie')).toBeDefined();
+});
