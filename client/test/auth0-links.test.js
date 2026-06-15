@@ -25,8 +25,13 @@ const run = async () => {
   const signout = readClientFile('pages/auth/signout.js');
 
   assertIncludes(signin, 'href="/auth/login"', 'signin page');
+  assertIncludes(signin, '<Auth0ErrorAlert query={query} />', 'signin page');
   assertIncludes(signup, 'href="/auth/login?screen_hint=signup"', 'signup page');
+  assertIncludes(signup, '<Auth0ErrorAlert query={query} />', 'signup page');
   assertIncludes(signout, "window.location.href = '/auth/logout'", 'signout page');
+
+  const auth0ErrorAlert = readClientFile('components/auth0-error-alert.js');
+  assertIncludes(auth0ErrorAlert, 'Auth0 sign-in failed', 'Auth0 error alert');
 
   const nextConfig = require('../next.config');
   const rewrites = await nextConfig.rewrites();
@@ -51,4 +56,3 @@ run().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-

@@ -117,7 +117,7 @@ system.
 - [x] Keep `client/pages/_app.js` reading user state from
   `/api/users/currentuser`.
 - [x] Keep header/nav login state based on the existing `currentUser` object.
-- [ ] Add error handling or user-facing feedback for failed Auth0 redirects.
+- [x] Add error handling or user-facing feedback for failed Auth0 redirects.
 - [ ] Decide whether to keep the auth-service redirect model or migrate the
   client to `@auth0/nextjs-auth0`.
 - [ ] If migrating to `@auth0/nextjs-auth0`, add client/server environment

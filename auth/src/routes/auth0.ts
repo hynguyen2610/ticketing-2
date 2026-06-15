@@ -89,6 +89,23 @@ router.get('/auth/login', async (req, res, next) => {
 
 router.get('/auth/callback', async (req, res, next) => {
   try {
+    if (req.query.error) {
+      const session = { ...((req.session as any) || {}) };
+      delete session.auth0State;
+      delete session.auth0CodeVerifier;
+      req.session = session;
+
+      const params = new URLSearchParams({
+        error: req.query.error as string,
+      });
+
+      if (req.query.error_description) {
+        params.set('error_description', req.query.error_description as string);
+      }
+
+      return res.redirect(`/auth/signin?${params.toString()}`);
+    }
+
     const { code, state } = req.query;
     const session = req.session as any;
 

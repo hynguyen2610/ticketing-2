@@ -136,6 +136,22 @@ it('rejects callback requests with mismatched state', async () => {
   expect(mockCallback).not.toHaveBeenCalled();
 });
 
+it('redirects Auth0 callback errors back to the sign-in page with feedback details', async () => {
+  const response = await request(app)
+    .get('/auth/callback?error=access_denied&error_description=User%20cancelled%20login')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(302);
+
+  expect(response.get('Location')).toEqual(
+    '/auth/signin?error=access_denied&error_description=User+cancelled+login'
+  );
+  expect(mockCallback).not.toHaveBeenCalled();
+});
+
 it('creates a local user and session after a successful Auth0 callback', async () => {
   const response = await request(app)
     .get('/auth/callback?code=auth-code&state=test-state')
