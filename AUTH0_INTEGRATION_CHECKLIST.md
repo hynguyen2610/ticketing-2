@@ -106,6 +106,9 @@ system.
   - `AUTH0_CALLBACK_URL`
   - `AUTH0_LOGOUT_REDIRECT_URL`
   - `AUTH0_AUDIENCE`
+  - Cluster object exists with all expected keys, but the current values appear
+    to be placeholder template values and still need replacement with real
+    Auth0 tenant/application values.
 - [x] Confirm `JWT_KEY` still exists because the auth service still issues the
   internal JWT cookie after Auth0 login.
 - [x] Decide how to manage local developer secrets outside source control.
