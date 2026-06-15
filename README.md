@@ -50,6 +50,12 @@ export AUTH0_LOGOUT_REDIRECT_URL=http://localhost:3000
 scripts/apply-auth0-secret.sh
 ```
 
+To apply, restart `auth-depl`, and run value-safe pod/route checks:
+
+```sh
+scripts/apply-auth0-secret.sh --restart-auth
+```
+
 Check the live Kubernetes secret without printing secret values:
 
 ```sh

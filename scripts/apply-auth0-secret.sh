@@ -4,13 +4,19 @@ set -eu
 KUBECTL="${KUBECTL:-kubectl}"
 NAMESPACE="${NAMESPACE:-default}"
 SECRET_NAME="${SECRET_NAME:-auth0-secret}"
+AUTH_DEPLOYMENT="${AUTH_DEPLOYMENT:-auth-depl}"
+RESTART_AUTH=false
 
 usage() {
   cat <<EOF
-Usage: $0
+Usage: $0 [--restart-auth]
 
 Creates or updates the Kubernetes Auth0 secret from environment variables.
 Secret values are not printed.
+
+Options:
+  --restart-auth  Restart the auth deployment after applying the secret and run
+                  value-safe pod/route checks
 
 Required environment variables:
   AUTH0_DOMAIN
@@ -26,6 +32,8 @@ Other environment variables:
   KUBECTL      Kubectl command to use (default: kubectl)
   NAMESPACE    Kubernetes namespace (default: default)
   SECRET_NAME  Secret name (default: auth0-secret)
+  AUTH_DEPLOYMENT
+              Auth deployment to restart with --restart-auth (default: auth-depl)
 EOF
 }
 
@@ -53,10 +61,22 @@ require_real_value() {
   return 0
 }
 
-if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ] || [ "${1:-}" = "help" ]; then
-  usage
-  exit 0
-fi
+case "${1:-}" in
+  "")
+    ;;
+  --restart-auth)
+    RESTART_AUTH=true
+    ;;
+  --help|-h|help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "Unknown option: $1" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
 
 status=0
 require_real_value AUTH0_DOMAIN "${AUTH0_DOMAIN:-}" || status=1
@@ -107,3 +127,12 @@ fi
 $KUBECTL apply -f "$tmp_manifest"
 
 echo "$SECRET_NAME=applied"
+
+if [ "$RESTART_AUTH" = true ]; then
+  $KUBECTL rollout restart "deploy/$AUTH_DEPLOYMENT" -n "$NAMESPACE"
+  $KUBECTL rollout status "deploy/$AUTH_DEPLOYMENT" -n "$NAMESPACE"
+
+  script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+  "$script_dir/check-auth0-secret.sh" --pod-env
+  "$script_dir/check-auth0-secret.sh" --login-route
+fi

@@ -119,6 +119,8 @@ system.
     `scripts/check-auth0-secret.sh`.
   - Apply real values without a committed manifest by exporting the Auth0 env
     vars and running `scripts/apply-auth0-secret.sh`.
+  - Or apply, restart `auth-depl`, and run pod/route checks with
+    `scripts/apply-auth0-secret.sh --restart-auth`.
   - Run all Auth0 deployment checks with `scripts/check-auth0-secret.sh --all`.
   - After updating the secret and restarting `auth-depl`, verify the running
     pod with `scripts/check-auth0-secret.sh --pod-env`.
