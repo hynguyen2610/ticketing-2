@@ -65,27 +65,37 @@ const run = async () => {
   const previousAuthHost = process.env.AUTH_SRV_SERVICE_HOST;
   const previousAuthPort = process.env.AUTH_SRV_SERVICE_PORT;
 
-  process.env.AUTH_SRV_SERVICE_HOST = '10.96.0.10';
-  process.env.AUTH_SRV_SERVICE_PORT = '3000';
+  try {
+    process.env.AUTH_SRV_SERVICE_HOST = '10.96.0.10';
+    process.env.AUTH_SRV_SERVICE_PORT = '3000';
 
-  const envNextConfig = loadNextConfig();
-  const envRewrites = await envNextConfig.rewrites();
+    const envNextConfig = loadNextConfig();
+    const envRewrites = await envNextConfig.rewrites();
 
-  assert.strictEqual(
-    findRewrite(envRewrites, '/auth/login')?.destination,
-    'http://10.96.0.10:3000/auth/login'
-  );
+    assert.strictEqual(
+      findRewrite(envRewrites, '/auth/login')?.destination,
+      'http://10.96.0.10:3000/auth/login'
+    );
+    assert.strictEqual(
+      findRewrite(envRewrites, '/auth/logout')?.destination,
+      'http://10.96.0.10:3000/auth/logout'
+    );
+    assert.strictEqual(
+      findRewrite(envRewrites, '/auth/callback')?.destination,
+      'http://10.96.0.10:3000/auth/callback'
+    );
+  } finally {
+    if (previousAuthHost === undefined) {
+      delete process.env.AUTH_SRV_SERVICE_HOST;
+    } else {
+      process.env.AUTH_SRV_SERVICE_HOST = previousAuthHost;
+    }
 
-  if (previousAuthHost === undefined) {
-    delete process.env.AUTH_SRV_SERVICE_HOST;
-  } else {
-    process.env.AUTH_SRV_SERVICE_HOST = previousAuthHost;
-  }
-
-  if (previousAuthPort === undefined) {
-    delete process.env.AUTH_SRV_SERVICE_PORT;
-  } else {
-    process.env.AUTH_SRV_SERVICE_PORT = previousAuthPort;
+    if (previousAuthPort === undefined) {
+      delete process.env.AUTH_SRV_SERVICE_PORT;
+    } else {
+      process.env.AUTH_SRV_SERVICE_PORT = previousAuthPort;
+    }
   }
 
   console.log('Auth0 client link smoke tests passed.');

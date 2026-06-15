@@ -55,8 +55,11 @@ system.
 
 - [x] The client does not use `@auth0/nextjs-auth0` or another Auth0 SDK.
   - Current behavior intentionally depends on the auth service OIDC flow.
-- [ ] Backend services do not validate Auth0-issued access tokens directly.
+- [x] Backend services do not validate Auth0-issued access tokens directly.
   - They still validate the internal JWT cookie signed by `JWT_KEY`.
+  - Verified by service route/app wiring: tickets, orders, payment, and image
+    services use `@ndhcode/common` `currentUser` and `JWT_KEY`, with no Auth0
+    bearer-token/JWKS validation in those services.
 - [x] Auth0 ID/access tokens are not stored in the browser cookie session.
 - [x] Automated auth service tests cover `/auth/login`, `/auth/callback`,
   `/auth/logout`, and Auth0 current-user behavior.
