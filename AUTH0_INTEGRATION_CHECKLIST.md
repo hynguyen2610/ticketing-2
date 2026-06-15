@@ -35,6 +35,8 @@ system.
   the local user, and stores:
   - existing internal `jwt`
   - `auth0User`
+- [x] Local users store Auth0 `sub` as `auth0Sub` and use it as the stable
+  Auth0 account link.
 - [x] `auth/src/routes/current-user.ts` can return either the internal JWT user
   or `auth0User` from the session.
 - [x] `client/pages/auth/signin.js` links to `/auth/login`.
@@ -132,8 +134,8 @@ system.
 - [x] Add automated tests for callback state mismatch.
 - [x] Add automated tests for successful Auth0 callback using mocked
   `openid-client`.
-- [ ] Consider storing a stable Auth0 subject (`sub`) on the local user model
-  instead of linking only by email.
+- [x] Store a stable Auth0 subject (`sub`) on the local user model instead of
+  linking only by email.
 - [ ] Consider clearing Auth0 session metadata on local `/api/users/signout`.
 
 ## 6. Backend Service Token Strategy
@@ -190,7 +192,7 @@ system.
 
 ## 10. Optional Improvements
 
-- [ ] Store Auth0 `sub` on local users and handle email changes safely.
+- [x] Store Auth0 `sub` on local users and handle email changes safely.
 - [ ] Add roles or permissions in Auth0 for admin vs regular users.
 - [ ] Add an Auth0 Action to populate custom claims.
 - [ ] Add organization support if needed.

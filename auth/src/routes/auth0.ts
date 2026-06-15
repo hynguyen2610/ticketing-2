@@ -111,11 +111,31 @@ router.get('/auth/callback', async (req, res, next) => {
     if (!email || typeof email !== 'string') {
       throw new BadRequestError('Auth0 user profile must include email');
     }
+    const auth0Sub = claims.sub;
+    if (!auth0Sub || typeof auth0Sub !== 'string') {
+      throw new BadRequestError('Auth0 user profile must include subject');
+    }
 
-    let user: any = await User.findOne({ email });
-    if (!user) {
-      const randomPassword = Math.random().toString(36).slice(2);
-      user = await User.build({ email, password: randomPassword }).save();
+    let user: any = await User.findOne({ auth0Sub });
+    if (user && user.email !== email) {
+      const userWithEmail = await User.findOne({ email });
+      if (userWithEmail && userWithEmail.id !== user.id) {
+        throw new BadRequestError('Email is already linked to a different account');
+      }
+      user.email = email;
+      await user.save();
+    } else if (!user) {
+      user = await User.findOne({ email });
+      if (user?.auth0Sub && user.auth0Sub !== auth0Sub) {
+        throw new BadRequestError('Email is already linked to a different Auth0 account');
+      }
+      if (user) {
+        user.auth0Sub = auth0Sub;
+        await user.save();
+      } else {
+        const randomPassword = Math.random().toString(36).slice(2);
+        user = await User.build({ email, password: randomPassword, auth0Sub }).save();
+      }
     }
 
     const userJwt = jwt.sign(
@@ -133,7 +153,7 @@ router.get('/auth/callback', async (req, res, next) => {
         id: user.id,
         email,
         name: claims.name,
-        sub: claims.sub,
+        sub: auth0Sub,
       },
     };
 

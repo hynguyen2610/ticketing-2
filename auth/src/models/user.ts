@@ -6,6 +6,7 @@ import { Password } from '../services/password';
 interface UserAttrs {
   email: string;
   password: string;
+  auth0Sub?: string;
 }
 
 // An interface that describes the properties
@@ -19,6 +20,7 @@ interface UserModel extends mongoose.Model<UserDoc> {
 interface UserDoc extends mongoose.Document {
   email: string;
   password: string;
+  auth0Sub?: string;
 }
 
 const userSchema = new mongoose.Schema(
@@ -30,6 +32,13 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true
+    },
+    auth0Sub: {
+      type: String,
+      required: false,
+      index: true,
+      unique: true,
+      sparse: true
     }
   },
   {

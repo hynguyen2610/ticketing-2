@@ -6,6 +6,7 @@ import { Issuer, generators } from 'openid-client';
 const mockAuthorizationUrl = jest.fn();
 const mockCallback = jest.fn();
 const mockClientConstructor = jest.fn();
+const mockClaims = jest.fn();
 
 jest.mock('openid-client', () => ({
   Issuer: {
@@ -46,14 +47,15 @@ beforeEach(() => {
   process.env.AUTH0_AUDIENCE = 'https://ticketing.example.test';
 
   mockAuthorizationUrl.mockReturnValue('https://dev-example.us.auth0.com/authorize');
+  mockClaims.mockReturnValue({
+    email: 'auth0@test.com',
+    name: 'Auth0 Test User',
+    sub: 'auth0|123',
+  });
   mockCallback.mockResolvedValue({
     id_token: 'auth0-id-token',
     access_token: 'auth0-access-token',
-    claims: () => ({
-      email: 'auth0@test.com',
-      name: 'Auth0 Test User',
-      sub: 'auth0|123',
-    }),
+    claims: mockClaims,
   });
   mockClientConstructor.mockReturnValue({
     authorizationUrl: mockAuthorizationUrl,
@@ -152,6 +154,7 @@ it('creates a local user and session after a successful Auth0 callback', async (
     { code_verifier: 'test-code-verifier' }
   );
   expect(user).toBeDefined();
+  expect(user!.auth0Sub).toEqual('auth0|123');
   expect(response.get('Location')).toEqual('/');
   expect(response.get('Set-Cookie')).toBeDefined();
 
@@ -165,6 +168,108 @@ it('creates a local user and session after a successful Auth0 callback', async (
   });
   expect(session.auth0IdToken).toBeUndefined();
   expect(session.auth0AccessToken).toBeUndefined();
+});
+
+it('reuses an existing user matched by Auth0 subject when the email changes', async () => {
+  const existingUser = await User.build({
+    email: 'old-email@test.com',
+    password: 'password',
+    auth0Sub: 'auth0|123',
+  }).save();
+
+  const response = await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(302);
+
+  const users = await User.find({});
+  const updatedUser = await User.findById(existingUser.id);
+  const session = readSessionCookie(response.get('Set-Cookie')!);
+
+  expect(users).toHaveLength(1);
+  expect(updatedUser!.email).toEqual('auth0@test.com');
+  expect(session.auth0User.id).toEqual(existingUser.id);
+  expect(session.auth0User.email).toEqual('auth0@test.com');
+});
+
+it('rejects Auth0 callback when subject matches but new email belongs to another user', async () => {
+  await User.build({
+    email: 'old-email@test.com',
+    password: 'password',
+    auth0Sub: 'auth0|123',
+  }).save();
+  await User.build({
+    email: 'auth0@test.com',
+    password: 'password',
+  }).save();
+
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(400);
+});
+
+it('links an existing local user to Auth0 by email when not linked yet', async () => {
+  const existingUser = await User.build({
+    email: 'auth0@test.com',
+    password: 'password',
+  }).save();
+
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(302);
+
+  const user = await User.findById(existingUser.id);
+  const users = await User.find({});
+
+  expect(users).toHaveLength(1);
+  expect(user!.auth0Sub).toEqual('auth0|123');
+});
+
+it('rejects Auth0 callback when the email is linked to a different Auth0 subject', async () => {
+  await User.build({
+    email: 'auth0@test.com',
+    password: 'password',
+    auth0Sub: 'auth0|different',
+  }).save();
+
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(400);
+});
+
+it('rejects Auth0 callback when the profile does not include a subject', async () => {
+  mockClaims.mockReturnValue({
+    email: 'auth0@test.com',
+    name: 'Auth0 Test User',
+  });
+
+  await request(app)
+    .get('/auth/callback?code=auth-code&state=test-state')
+    .set('Cookie', buildSessionCookie({
+      auth0State: 'test-state',
+      auth0CodeVerifier: 'test-code-verifier',
+    }))
+    .send()
+    .expect(400);
 });
 
 it('redirects through Auth0 logout when Auth0 logout env vars are configured', async () => {
