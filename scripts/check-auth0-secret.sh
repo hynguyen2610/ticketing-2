@@ -58,9 +58,18 @@ check_required_key() {
   fi
 
   case "$value" in
-    YOUR_AUTH0_*)
+    YOUR_AUTH0_*|*_PLACEHOLDER|PLACEHOLDER)
       echo "$key=placeholder"
       return 1
+      ;;
+    http://*|https://*)
+      if [ "$key" = "AUTH0_DOMAIN" ]; then
+        echo "$key=url-instead-of-domain"
+        return 1
+      fi
+
+      echo "$key=configured"
+      return 0
       ;;
     *)
       echo "$key=configured"
@@ -79,9 +88,18 @@ check_required_value() {
   fi
 
   case "$value" in
-    YOUR_AUTH0_*)
+    YOUR_AUTH0_*|*_PLACEHOLDER|PLACEHOLDER)
       echo "$key=placeholder"
       return 1
+      ;;
+    http://*|https://*)
+      if [ "$key" = "AUTH0_DOMAIN" ]; then
+        echo "$key=url-instead-of-domain"
+        return 1
+      fi
+
+      echo "$key=configured"
+      return 0
       ;;
     *)
       echo "$key=configured"
@@ -110,7 +128,7 @@ check_optional_key() {
   fi
 
   case "$value" in
-    YOUR_AUTH0_*)
+    YOUR_AUTH0_*|*_PLACEHOLDER|PLACEHOLDER)
       echo "$key=placeholder"
       return 1
       ;;
@@ -131,7 +149,7 @@ check_optional_value() {
   fi
 
   case "$value" in
-    YOUR_AUTH0_*)
+    YOUR_AUTH0_*|*_PLACEHOLDER|PLACEHOLDER)
       echo "$key=placeholder"
       return 1
       ;;
@@ -192,6 +210,7 @@ check_pod_env() {
 
 check_login_route() {
   tmp_file="${TMPDIR:-/tmp}/auth0-login-route.$$"
+  header_file="${TMPDIR:-/tmp}/auth0-login-route-headers.$$"
   port_forward_log="${TMPDIR:-/tmp}/auth0-port-forward.$$"
 
   cleanup() {
@@ -199,7 +218,7 @@ check_login_route() {
       kill "$port_forward_pid" 2>/dev/null || true
       wait "$port_forward_pid" 2>/dev/null || true
     fi
-    rm -f "$tmp_file" "$port_forward_log"
+    rm -f "$tmp_file" "$header_file" "$port_forward_log"
   }
 
   trap cleanup EXIT INT TERM
@@ -225,8 +244,8 @@ check_login_route() {
     return 1
   fi
 
-  status_code="$(curl -sS -o "$tmp_file" -w "%{http_code}" --max-time 5 "http://127.0.0.1:$LOCAL_PORT/auth/login" 2>/dev/null || true)"
-  location="$(grep -i '^location:' "$tmp_file" 2>/dev/null | awk '{$1=""; sub(/^ /, ""); print}' | tr -d '\r')"
+  status_code="$(curl -sS -o "$tmp_file" -D "$header_file" -w "%{http_code}" --max-time 5 "http://127.0.0.1:$LOCAL_PORT/auth/login" 2>/dev/null || true)"
+  location="$(grep -i '^location:' "$header_file" 2>/dev/null | awk '{$1=""; sub(/^ /, ""); print}' | tr -d '\r')"
 
   case "$status_code" in
     302)

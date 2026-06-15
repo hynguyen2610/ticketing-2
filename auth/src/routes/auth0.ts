@@ -9,12 +9,20 @@ let auth0Client: Client | undefined;
 let auth0ClientConfigKey: string | undefined;
 
 const isPlaceholderAuth0Value = (value?: string) => {
-  return !!value && value.startsWith('YOUR_AUTH0_');
+  return !!value && (value.startsWith('YOUR_AUTH0_') || value.endsWith('_PLACEHOLDER') || value === 'PLACEHOLDER');
 };
 
 const assertRealAuth0Value = (name: string, value: string) => {
   if (isPlaceholderAuth0Value(value)) {
     throw new BadRequestError(`${name} must be configured with a real Auth0 value`);
+  }
+};
+
+const assertAuth0Domain = (value: string) => {
+  assertRealAuth0Value('AUTH0_DOMAIN', value);
+
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    throw new BadRequestError('AUTH0_DOMAIN must be the tenant domain only, without http:// or https://');
   }
 };
 
@@ -28,7 +36,7 @@ const getAuth0Client = async () => {
   if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID || !AUTH0_CLIENT_SECRET) {
     throw new BadRequestError('Auth0 environment variables are required for Auth0 login routes');
   }
-  assertRealAuth0Value('AUTH0_DOMAIN', AUTH0_DOMAIN);
+  assertAuth0Domain(AUTH0_DOMAIN);
   assertRealAuth0Value('AUTH0_CLIENT_ID', AUTH0_CLIENT_ID);
   assertRealAuth0Value('AUTH0_CLIENT_SECRET', AUTH0_CLIENT_SECRET);
 

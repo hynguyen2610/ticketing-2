@@ -140,6 +140,17 @@ it('rejects Auth0 login when required Auth0 env vars still use placeholder value
   expect(Issuer.discover).not.toHaveBeenCalled();
 });
 
+it('rejects Auth0 login when the Auth0 domain includes a URL scheme', async () => {
+  process.env.AUTH0_DOMAIN = 'https://dev-example.us.auth0.com';
+
+  await request(app)
+    .get('/auth/login')
+    .send()
+    .expect(400);
+
+  expect(Issuer.discover).not.toHaveBeenCalled();
+});
+
 it('rejects Auth0 login when the callback URL is missing', async () => {
   delete process.env.AUTH0_CALLBACK_URL;
 
@@ -180,7 +191,7 @@ it('omits Auth0 audience from login options when it is not configured', async ()
 });
 
 it('rejects Auth0 login when the audience still uses a placeholder value', async () => {
-  process.env.AUTH0_AUDIENCE = 'YOUR_AUTH0_AUDIENCE';
+  process.env.AUTH0_AUDIENCE = 'AUTH0_AUDIENCE_PLACEHOLDER';
 
   await request(app)
     .get('/auth/login')

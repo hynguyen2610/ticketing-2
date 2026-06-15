@@ -39,7 +39,14 @@ EOF
 
 is_placeholder() {
   case "${1:-}" in
-    YOUR_AUTH0_*) return 0 ;;
+    YOUR_AUTH0_*|*_PLACEHOLDER|PLACEHOLDER) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_url() {
+  case "${1:-}" in
+    http://*|https://*) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -84,6 +91,11 @@ require_real_value AUTH0_CLIENT_ID "${AUTH0_CLIENT_ID:-}" || status=1
 require_real_value AUTH0_CLIENT_SECRET "${AUTH0_CLIENT_SECRET:-}" || status=1
 require_real_value AUTH0_CALLBACK_URL "${AUTH0_CALLBACK_URL:-}" || status=1
 require_real_value AUTH0_LOGOUT_REDIRECT_URL "${AUTH0_LOGOUT_REDIRECT_URL:-}" || status=1
+
+if [ -n "${AUTH0_DOMAIN:-}" ] && is_url "$AUTH0_DOMAIN"; then
+  echo "AUTH0_DOMAIN=must-be-domain-only-without-scheme" >&2
+  status=1
+fi
 
 if [ -n "${AUTH0_AUDIENCE:-}" ] && is_placeholder "$AUTH0_AUDIENCE"; then
   echo "AUTH0_AUDIENCE=placeholder" >&2

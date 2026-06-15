@@ -7,6 +7,7 @@
 .env.test.local
 .env.production.local
 infra/k8s-apps/auth0-secret.yaml
+infra/secret/*.yaml
 
 # Next.js build output
 **/.next/
