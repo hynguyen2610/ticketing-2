@@ -99,6 +99,8 @@ system.
 - [x] Add `infra/k8s-apps/auth0-secret.example.yaml` as a safe placeholder.
 - [x] Make `AUTH0_AUDIENCE` optional in Kubernetes because it is only needed
   when an Auth0 API audience is configured.
+- [x] Add a safe script to verify the live Auth0 secret without printing secret
+  values.
 - [x] Document the manual `kubectl create secret generic auth0-secret` command
   in `README.md`.
 - [ ] Create the real Kubernetes secret in the target cluster:
@@ -111,6 +113,8 @@ system.
   - Cluster object exists with all expected keys, but the current values appear
     to be placeholder template values and still need replacement with real
     Auth0 tenant/application values.
+  - Verify without printing secret values by running
+    `scripts/check-auth0-secret.sh`.
 - [x] Confirm `JWT_KEY` still exists because the auth service still issues the
   internal JWT cookie after Auth0 login.
 - [x] Decide how to manage local developer secrets outside source control.

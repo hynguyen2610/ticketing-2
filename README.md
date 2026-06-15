@@ -38,6 +38,12 @@ kubectl create secret generic auth0-secret \
 
 `AUTH0_AUDIENCE` is optional. Add `--from-literal=AUTH0_AUDIENCE=<your-auth0-audience>` only if you configured an Auth0 API audience. If you deploy to a remote cluster host, replace the callback and logout URLs with the external app URL instead of `localhost`.
 
+Check the live Kubernetes secret without printing secret values:
+
+```sh
+scripts/check-auth0-secret.sh
+```
+
 > Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
 >
 > If you prefer a local manifest while developing, copy
