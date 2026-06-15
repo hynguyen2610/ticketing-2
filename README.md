@@ -48,6 +48,13 @@ kubectl create secret generic auth0-secret \
 
 The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
 
+### Auth0 architecture decision
+
+The current Auth0 integration is the intended architecture for this codebase.
+Auth0 is handled by the `auth` service, and the client reaches that service via
+the existing `/auth/*` rewrites. See
+`docs/adr/0001-auth0-auth-service-boundary.md` for the decision record.
+
 ### Auth token strategy
 
 Auth0 is currently integrated at the auth service boundary. After a successful

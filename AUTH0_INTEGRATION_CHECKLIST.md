@@ -17,11 +17,12 @@ system.
   `payment`, and image services can continue using `@ndhcode/common`
   `currentUser` middleware.
 - [x] Use Auth0 for browser login/signup/logout redirects.
-- [ ] Decide whether this is the final architecture or a migration bridge.
-  - Option A: keep Auth0 only at the `auth` service boundary and continue using
-    internal JWT cookies between frontend and services.
-  - Option B: migrate backend services to validate Auth0 access tokens directly
-    using issuer, audience, and JWKS.
+- [x] Decide whether this is the final architecture or a migration bridge.
+  - Decision: keep Auth0 only at the `auth` service boundary and continue using
+    internal JWT cookies between frontend and services for this integration.
+  - A future migration to backend Auth0 access-token validation would be a
+    separate architecture change.
+  - ADR: `docs/adr/0001-auth0-auth-service-boundary.md`.
 
 ## Current Implementation
 
@@ -51,7 +52,7 @@ system.
 
 ## Not Implemented Yet
 
-- [ ] The client does not use `@auth0/nextjs-auth0` or another Auth0 SDK.
+- [x] The client does not use `@auth0/nextjs-auth0` or another Auth0 SDK.
   - Current behavior intentionally depends on the auth service OIDC flow.
 - [ ] Backend services do not validate Auth0-issued access tokens directly.
   - They still validate the internal JWT cookie signed by `JWT_KEY`.
@@ -118,10 +119,10 @@ system.
   `/api/users/currentuser`.
 - [x] Keep header/nav login state based on the existing `currentUser` object.
 - [x] Add error handling or user-facing feedback for failed Auth0 redirects.
-- [ ] Decide whether to keep the auth-service redirect model or migrate the
+- [x] Decide whether to keep the auth-service redirect model or migrate the
   client to `@auth0/nextjs-auth0`.
-- [ ] If migrating to `@auth0/nextjs-auth0`, add client/server environment
-  variables and replace the current `/auth/*` rewrite model.
+- [x] Keep the auth-service redirect model for this integration; do not add
+  `@auth0/nextjs-auth0` client/server environment variables yet.
 
 ## 5. Auth Service Integration
 
