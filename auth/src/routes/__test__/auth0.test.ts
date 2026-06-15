@@ -97,6 +97,10 @@ it('redirects to Auth0 and stores PKCE state in the session', async () => {
   });
   expect(response.get('Location')).toEqual('https://dev-example.us.auth0.com/authorize');
   expect(response.get('Set-Cookie')).toBeDefined();
+
+  const session = readSessionCookie(response.get('Set-Cookie')!);
+  expect(session.auth0CodeVerifier).toEqual('test-code-verifier');
+  expect(session.auth0State).toEqual('test-state');
 });
 
 it('rejects Auth0 login when required Auth0 env vars are missing', async () => {
