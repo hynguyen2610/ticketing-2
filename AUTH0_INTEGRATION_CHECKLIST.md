@@ -136,7 +136,7 @@ system.
   `openid-client`.
 - [x] Store a stable Auth0 subject (`sub`) on the local user model instead of
   linking only by email.
-- [ ] Consider clearing Auth0 session metadata on local `/api/users/signout`.
+- [x] Confirm local `/api/users/signout` clears Auth0 session metadata.
 
 ## 6. Backend Service Token Strategy
 
