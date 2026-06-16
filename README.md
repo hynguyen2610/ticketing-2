@@ -143,13 +143,40 @@ scripts/system-infra.sh down
 
 ## Run local development
 
+Tilt is the preferred local development loop because it can sync source edits
+into running Kubernetes containers without rebuilding every image.
+
 First bring up the system infra:
 
 ```sh
 scripts/system-infra.sh up
 ```
 
-Then start Skaffold dev from the repo root using the cluster registry and service port forwarding:
+Then start Tilt from the repo root:
+
+```sh
+tilt up
+```
+
+Or use the helper script:
+
+```sh
+scripts/dev-tilt.sh
+```
+
+On success, Tilt will forward the ticketing client to
+`http://127.0.0.1:13100`.
+
+Tilt uses the cluster registry configured in the root `Tiltfile`:
+`100.114.61.78:30500/ticketing`.
+
+The `Tiltfile` explicitly allows the current development Kubernetes context,
+`kubernetes-admin@kubernetes`, because Tilt treats that name as potentially
+production-like. Update the allow-list if your local context name changes.
+
+Skaffold is still available as a fallback during the Tilt migration. To run the
+old flow, start Skaffold dev from the repo root using the cluster registry and
+service port forwarding:
 
 ```sh
 skaffold dev \

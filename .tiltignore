@@ -1,0 +1,8 @@
+.git
+**/node_modules
+**/.next
+**/.swc
+**/build
+**/coverage
+**/npm-debug.log*
+infra/secret

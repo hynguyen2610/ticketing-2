@@ -26,6 +26,14 @@ The migration should preserve the current Kubernetes manifests, local registry f
 - Preserve the existing client port forward at `13100`.
 - Keep system infrastructure startup explicit and predictable.
 
+## Implementation Status
+
+- Initial `Tiltfile` added.
+- `scripts/dev-tilt.sh` added as the new local development helper.
+- Root `.tiltignore` added to reduce watcher noise and avoid ignored secrets.
+- README updated to describe Tilt as the preferred local development loop.
+- Skaffold remains available as a fallback until Tilt is validated end to end.
+
 ## Proposed Tilt Structure
 
 The initial `Tiltfile` should:
