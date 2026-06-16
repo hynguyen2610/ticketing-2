@@ -161,6 +161,7 @@ router.get('/auth/callback', async (req, res, next) => {
     if (!email || typeof email !== 'string') {
       throw new BadRequestError('Auth0 user profile must include email');
     }
+    const picture = typeof claims.picture === 'string' ? claims.picture : undefined;
     const auth0Sub = claims.sub;
     if (!auth0Sub || typeof auth0Sub !== 'string') {
       throw new BadRequestError('Auth0 user profile must include subject');
@@ -203,6 +204,7 @@ router.get('/auth/callback', async (req, res, next) => {
         id: user.id,
         email,
         name: claims.name,
+        picture,
         sub: auth0Sub,
       },
     };

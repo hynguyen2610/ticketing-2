@@ -50,6 +50,7 @@ beforeEach(() => {
   mockClaims.mockReturnValue({
     email: 'auth0@test.com',
     name: 'Auth0 Test User',
+    picture: 'https://images.example.test/auth0-user.png',
     sub: 'auth0|123',
   });
   mockCallback.mockResolvedValue({
@@ -309,6 +310,7 @@ it('creates a local user and session after a successful Auth0 callback', async (
     id: user!.id,
     email: 'auth0@test.com',
     name: 'Auth0 Test User',
+    picture: 'https://images.example.test/auth0-user.png',
     sub: 'auth0|123',
   });
   expect(session.auth0IdToken).toBeUndefined();

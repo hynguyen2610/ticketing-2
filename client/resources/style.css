@@ -1,20 +1,35 @@
-body {
-    background-color: #E3F2FD; /* Light blue pastel */
-    color: #0D47A1; /* Dark blue for text */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background: #f7f9fc;
+  }
+
+  body {
+    @apply bg-surface text-ink antialiased;
+  }
+
+  a {
+    @apply text-brand transition-colors;
+  }
+
+  a:hover {
+    @apply text-blue-700;
+  }
 }
-.navbar {
-    background-color: #BBDEFB; /* Medium blue pastel */
-}
-.footer {
-    background-color: #90CAF9; /* Light-medium blue pastel */
-    color: #0D47A1; /* Dark blue for text */
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    text-align: center;
-}
-.main-content {
-    padding: 20px;
-    margin-bottom: 50px;
+
+@layer components {
+  .page-panel {
+    @apply rounded-lg border border-line bg-white shadow-soft;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-blue-200 hover:bg-blue-50;
+  }
 }

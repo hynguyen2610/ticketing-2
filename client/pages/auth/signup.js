@@ -2,12 +2,15 @@ import Auth0ErrorAlert from '../../components/auth0-error-alert';
 
 export default ({ query }) => {
   return (
-    <div>
-      <h1>Sign Up</h1>
+    <section className="mx-auto max-w-md page-panel p-8">
+      <p className="text-sm font-medium uppercase tracking-wide text-brand">Create account</p>
+      <h1 className="mt-2 text-2xl font-semibold text-ink">Join Ticket System</h1>
+      <p className="mt-3 text-sm leading-6 text-muted">
+        Create an Auth0-backed account and start selling or reserving tickets.
+      </p>
       <Auth0ErrorAlert query={query} />
-      <p>Create an account using Auth0.</p>
-      <a href="/auth/login?screen_hint=signup" className="btn btn-primary">Sign up with Auth0</a>
-    </div>
+      <a href="/auth/login?screen_hint=signup" className="btn-primary mt-6 w-full">Sign up with Auth0</a>
+    </section>
   );
 };
 

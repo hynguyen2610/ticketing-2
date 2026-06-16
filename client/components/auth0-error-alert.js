@@ -15,9 +15,9 @@ export default ({ query = {} }) => {
   }
 
   return (
-    <div className="alert alert-danger" role="alert">
-      <h4>Auth0 sign-in failed</h4>
-      <p className="mb-0">
+    <div className="mb-5 rounded-md border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
+      <h2 className="text-sm font-semibold">Auth0 sign-in failed</h2>
+      <p className="mt-1 text-sm">
         {description || 'Please try again. If the problem continues, check the Auth0 application settings.'}
       </p>
     </div>

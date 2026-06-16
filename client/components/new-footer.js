@@ -1,26 +1,10 @@
-import Script from 'next/script';
-
 export default () => {
-    return (
-        <>
-            <Script
-                src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-                strategy="beforeInteractive"
-            />
-            <Script
-                src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"
-                strategy="beforeInteractive"
-            />
-            <Script
-                src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
-                strategy="beforeInteractive"
-            />
-            <footer className="footer">
-                <div className="container">
-                    <span>&copy; 2023 Your Company</span>
-                </div>
-            </footer>
-        </>
-
-    );
-}
+  return (
+    <footer className="border-t border-line bg-white">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 text-sm text-muted sm:px-6 lg:px-8">
+        <span>&copy; 2026 Ticket System</span>
+        <span>Built for secure ticket workflows</span>
+      </div>
+    </footer>
+  );
+};

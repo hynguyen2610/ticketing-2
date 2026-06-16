@@ -7,6 +7,19 @@
 - Display the signed-in user's profile picture when Auth0 provides one.
 - Keep the existing auth-service architecture and `/auth/*` client flow intact.
 
+## Implementation Status
+
+- [x] Tailwind CSS is installed and configured for the client.
+- [x] Bootstrap app-shell usage has been removed from `_app`, header, footer,
+  and the refreshed landing/auth pages.
+- [x] The header displays Auth0 profile pictures when available, with initials
+  fallback.
+- [x] Auth0 `picture` claims are propagated through the auth service session.
+- [x] Home, sign-in, sign-up, and auth-error pages have an initial Tailwind
+  refresh.
+- [ ] Ticket creation, ticket detail, and order pages still need the full
+  Tailwind refresh.
+
 ## Current State
 
 - The client is a Next.js app under `client/`.
@@ -14,8 +27,8 @@
 - The header is implemented in `client/components/new-header.js`.
 - User state is loaded in `client/pages/_app.js` from `/api/users/currentuser`.
 - Auth0 profile data is stored in the auth service session as `auth0User`.
-- The auth service currently exposes `id`, `email`, `name`, and `sub`, but not a
-  profile-picture URL.
+- The auth service now exposes `id`, `email`, `name`, `picture`, and `sub`
+  through the Auth0 session user.
 
 ## Proposed Design Direction
 
