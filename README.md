@@ -143,16 +143,11 @@ scripts/system-infra.sh down
 
 ## Run local development
 
-Tilt is the preferred local development loop because it can sync source edits
-into running Kubernetes containers without rebuilding every image.
+Tilt is the preferred local development loop because it applies the local system
+infra prerequisites and can sync source edits into running Kubernetes containers
+without rebuilding every image.
 
-First bring up the system infra:
-
-```sh
-scripts/system-infra.sh up
-```
-
-Then start Tilt from the repo root:
+Start Tilt from the repo root:
 
 ```sh
 tilt up
@@ -167,8 +162,25 @@ scripts/dev-tilt.sh
 On success, Tilt will forward the ticketing client to
 `http://127.0.0.1:13100`.
 
+If port `13100` is already in use, choose another client port:
+
+```sh
+tilt up -- --client-port=13101
+```
+
+The helper script passes arguments through to Tilt, so this also works:
+
+```sh
+scripts/dev-tilt.sh -- --client-port=13101
+```
+
 Tilt uses the cluster registry configured in the root `Tiltfile`:
 `100.114.61.78:30500/ticketing`.
+
+The `system-infra` Tilt resource applies static PVs, PVCs, MongoDB, NATS,
+Redis, and Jaeger before the app resources start. Secrets such as `JWT_KEY`,
+`STRIPE_KEY`, and `auth0-secret-ticketing` must still exist before the app pods
+can become healthy.
 
 The `Tiltfile` explicitly allows the current development Kubernetes context,
 `kubernetes-admin@kubernetes`, because Tilt treats that name as potentially

@@ -2,6 +2,10 @@ REGISTRY = '100.114.61.78:30500/ticketing'
 
 allow_k8s_contexts('kubernetes-admin@kubernetes')
 
+config.define_string('client-port')
+tilt_config = config.parse()
+CLIENT_PORT = tilt_config.get('client-port', '13100')
+
 default_registry(REGISTRY)
 
 app_manifests = [
@@ -14,6 +18,31 @@ app_manifests = [
   './infra/k8s-apps/payment-depl.yaml',
   './infra/k8s-apps/tickets-depl.yaml',
 ]
+
+system_infra_deps = [
+  './scripts/system-infra.sh',
+  './infra/pvc/static-pvs.yaml',
+  './infra/pvc/auth-mongo-pvc.yaml',
+  './infra/pvc/image-managements-mongo-pvc.yaml',
+  './infra/pvc/orders-mongo-pvc.yaml',
+  './infra/pvc/payment-mongo-pvc.yaml',
+  './infra/pvc/tickets-mongo-pvc.yaml',
+  './infra/pvc/upload-storage-pvc.yaml',
+  './infra/k8s-system/auth-mongo-depl.yaml',
+  './infra/k8s-system/expiration-redis-depl.yaml',
+  './infra/k8s-system/image-management-mongo-depl.yaml',
+  './infra/k8s-system/jeager-depl.yaml',
+  './infra/k8s-system/nats-depl.yaml',
+  './infra/k8s-system/orders-mongo-depl.yaml',
+  './infra/k8s-system/payment-mongo-depl.yaml',
+  './infra/k8s-system/tickets-mongo-depl.yaml',
+]
+
+local_resource(
+  'system-infra',
+  'scripts/system-infra.sh up',
+  deps=system_infra_deps,
+)
 
 k8s_yaml(app_manifests)
 
@@ -83,11 +112,11 @@ docker_build(
   ],
 )
 
-k8s_resource('auth-depl', labels=['services'])
-k8s_resource('tickets-depl', labels=['services'])
-k8s_resource('orders-depl', labels=['services'])
-k8s_resource('expiration-depl', labels=['workers'])
-k8s_resource('payment-depl', labels=['services'])
-k8s_resource('image-management-backend-depl', labels=['image-management'])
-k8s_resource('image-management-frontend-depl', labels=['image-management'])
-k8s_resource('client-depl', port_forwards=['13100:3000'], labels=['frontend'])
+k8s_resource('auth-depl', labels=['services'], resource_deps=['system-infra'])
+k8s_resource('tickets-depl', labels=['services'], resource_deps=['system-infra'])
+k8s_resource('orders-depl', labels=['services'], resource_deps=['system-infra'])
+k8s_resource('expiration-depl', labels=['workers'], resource_deps=['system-infra'])
+k8s_resource('payment-depl', labels=['services'], resource_deps=['system-infra'])
+k8s_resource('image-management-backend-depl', labels=['image-management'], resource_deps=['system-infra'])
+k8s_resource('image-management-frontend-depl', labels=['image-management'], resource_deps=['system-infra'])
+k8s_resource('client-depl', port_forwards=[CLIENT_PORT + ':3000'], labels=['frontend'], resource_deps=['system-infra'])
