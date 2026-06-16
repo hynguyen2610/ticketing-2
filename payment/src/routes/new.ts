@@ -14,6 +14,7 @@ import { PaymentCreatedPublisher } from "../events/publisher/payment-created-pub
 import { natsWrapper } from "../nats-wrapper";
 
 const router = express.Router();
+const toStripeAmount = (price: number) => Math.round(price * 100);
 
 router.post(
   "/api/payment",
@@ -48,7 +49,7 @@ router.post(
 
     const charge = await stripeObject.charges.create({
       currency: "usd",
-      amount: order.price * 100,
+      amount: toStripeAmount(order.price),
       source: token,
     });
 
@@ -68,4 +69,4 @@ router.post(
   }
 );
 
-export { router as newPaymentRouter };
+export { router as newPaymentRouter, toStripeAmount };

@@ -4,6 +4,7 @@ import { app } from "../../app";
 import request from "supertest";
 import { stripeObject } from "../../stripe";
 import { Payment } from "../../models/payment";
+import { toStripeAmount } from "../new";
 
 it("return error when order is completed or cancelled", async () => {
   const userId = 'user1';
@@ -98,4 +99,41 @@ it('send correct response code in case of success and fail', async() => {
 
   const payment = await Payment.findOne({ orderId: order.id, stripeId: stripeCharge?.id});
   expect(payment).not.toBeNull();
+});
+
+it("rounds decimal order prices to integer cents before charging stripe", async () => {
+  const userId = "happy";
+  const order = Order.build({
+    id: new mongoose.Types.ObjectId().toHexString(),
+    price: 12.34,
+    status: OrderStatus.Created,
+    version: 0,
+    userId,
+  });
+  await order.save();
+
+  const createCharge = jest
+    .spyOn(stripeObject.charges, "create")
+    .mockResolvedValue({ id: "ch_test_decimal" } as any);
+
+  await request(app)
+    .post("/api/payment")
+    .set("Cookie", global.signin(userId))
+    .send({ token: "tok_visa", orderId: order.id })
+    .expect(201);
+
+  expect(createCharge).toHaveBeenCalledWith(
+    expect.objectContaining({
+      amount: 1234,
+      currency: "usd",
+      source: "tok_visa",
+    })
+  );
+
+  createCharge.mockRestore();
+});
+
+it("normalizes floating point price math to whole stripe cents", () => {
+  expect(Number.isInteger(toStripeAmount(10.99))).toBe(true);
+  expect(toStripeAmount(10.99)).toBe(1099);
 });
