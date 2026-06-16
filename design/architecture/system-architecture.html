@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ticketing System Architecture</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5f6b7a;
+      --line: #d8dee8;
+      --surface: #f7f9fc;
+      --panel: #ffffff;
+      --brand: #2563eb;
+      --brand-soft: #eff6ff;
+      --event: #7c3aed;
+      --event-soft: #f5f3ff;
+      --data: #047857;
+      --data-soft: #ecfdf5;
+      --warn: #b45309;
+      --warn-soft: #fffbeb;
+      --shadow: 0 16px 36px rgba(23, 32, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--surface);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 780px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .section {
+      margin-top: 24px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      font-size: 22px;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .diagram {
+      display: grid;
+      gap: 18px;
+    }
+
+    .architecture-canvas {
+      overflow-x: auto;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfdff;
+    }
+
+    .architecture-canvas svg {
+      display: block;
+      min-width: 1000px;
+      width: 100%;
+      height: auto;
+    }
+
+    .diagram-box {
+      fill: #ffffff;
+      stroke: var(--line);
+      stroke-width: 1.5;
+      rx: 10;
+    }
+
+    .diagram-box.app {
+      fill: var(--brand-soft);
+      stroke: #93c5fd;
+    }
+
+    .diagram-box.event {
+      fill: var(--event-soft);
+      stroke: #c4b5fd;
+    }
+
+    .diagram-box.data {
+      fill: var(--data-soft);
+      stroke: #86efac;
+    }
+
+    .diagram-box.external {
+      fill: var(--warn-soft);
+      stroke: #fcd34d;
+    }
+
+    .diagram-title {
+      fill: var(--ink);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .diagram-subtitle {
+      fill: var(--muted);
+      font-size: 12px;
+    }
+
+    .diagram-topic-title {
+      fill: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .diagram-topic-subtitle {
+      fill: var(--muted);
+      font-size: 11px;
+    }
+
+    .diagram-label {
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .diagram-arrow {
+      fill: none;
+      stroke: #64748b;
+      stroke-width: 2;
+      marker-end: url("#arrow");
+    }
+
+    .diagram-arrow.event-flow {
+      stroke: var(--event);
+      stroke-dasharray: 7 6;
+      marker-end: url("#event-arrow");
+    }
+
+    .diagram-arrow.payment-flow {
+      stroke: var(--warn);
+      marker-end: url("#payment-arrow");
+    }
+
+    .diagram-arrow.data-flow {
+      stroke: var(--data);
+      marker-end: url("#data-arrow");
+    }
+
+    .diagram-caption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tier {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .tier-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 92px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .nodes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .node {
+      min-height: 92px;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .node h3 {
+      font-size: 15px;
+    }
+
+    .node p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .app {
+      border-color: #bfdbfe;
+      background: var(--brand-soft);
+    }
+
+    .event {
+      border-color: #ddd6fe;
+      background: var(--event-soft);
+    }
+
+    .data {
+      border-color: #bbf7d0;
+      background: var(--data-soft);
+    }
+
+    .external {
+      border-color: #fde68a;
+      background: var(--warn-soft);
+    }
+
+    .flow-grid,
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+    }
+
+    .flow-card,
+    .info-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fbfdff;
+    }
+
+    .flow-card h3,
+    .info-card h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    ol,
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: #eef2f7;
+      color: var(--ink);
+      font-size: 0.92em;
+    }
+
+    .matrix {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .matrix th,
+    .matrix td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .matrix th {
+      background: #f1f5f9;
+      color: var(--ink);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .matrix tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: min(100% - 20px, 1180px);
+        padding-top: 16px;
+      }
+
+      .hero,
+      .section {
+        padding: 18px;
+      }
+
+      .tier {
+        grid-template-columns: 1fr;
+      }
+
+      .tier-label {
+        min-height: 48px;
+      }
+
+      .section-header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .architecture-canvas {
+        margin-inline: -4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">System Architecture</p>
+      <h1>Ticketing Platform</h1>
+      <p>
+        A Node.js microservice system running on Kubernetes. The client uses Next.js as the public
+        entry point, backend services own their data, and state changes are coordinated through
+        NATS Streaming events.
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Runtime View</p>
+          <h2>Kubernetes Service Map</h2>
+        </div>
+        <p class="note">Solid boxes are deployed workloads or managed dependencies.</p>
+      </div>
+
+      <div class="diagram">
+        <div class="architecture-canvas" aria-label="Box and arrow architecture diagram">
+          <svg viewBox="0 0 1120 980" role="img" aria-labelledby="architecture-diagram-title architecture-diagram-desc" style="font-family: Inter, ui-sans-serif, system-ui, sans-serif;">
+            <title id="architecture-diagram-title">Ticketing system architecture diagram</title>
+            <desc id="architecture-diagram-desc">
+              Browser traffic enters the Next.js client, which routes requests to auth, tickets,
+              orders, payment, and image management services. Services persist to their own data
+              stores and coordinate state changes through NATS Streaming.
+            </desc>
+
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"></path>
+              </marker>
+              <marker id="event-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#7c3aed"></path>
+              </marker>
+              <marker id="payment-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"></path>
+              </marker>
+              <marker id="data-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#047857"></path>
+              </marker>
+            </defs>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 LAYOUT CONSTANTS (all positions computed from these)
+                 Col centres: auth=155 tickets=310 orders=465 payment=620 expiration=775 images=930
+                 Box W=130, so left edge = centre-65
+                 ─────────────────────────────────────────────────────── -->
+
+            <!-- ── Row labels ── -->
+            <text class="diagram-label" x="16" y="76">External</text>
+            <text class="diagram-label" x="16" y="200">Edge</text>
+            <text class="diagram-label" x="16" y="330">Services</text>
+            <text class="diagram-label" x="16" y="490">Event topics</text>
+            <text class="diagram-label" x="16" y="650">Broker / Queue</text>
+            <text class="diagram-label" x="16" y="800">Data stores</text>
+
+            <!-- ── EXTERNAL ROW  y=52..126 ── -->
+            <!-- Browser  cx=155 -->
+            <rect class="diagram-box external" x="90" y="52" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="110" y="84">Browser</text>
+            <text class="diagram-subtitle" x="110" y="104">User UI traffic</text>
+
+            <!-- Auth0  cx=775 -->
+            <rect class="diagram-box external" x="710" y="52" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="730" y="84">Auth0</text>
+            <text class="diagram-subtitle" x="730" y="104">Hosted identity</text>
+
+            <!-- Stripe  cx=930 -->
+            <rect class="diagram-box external" x="865" y="52" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="885" y="84">Stripe</text>
+            <text class="diagram-subtitle" x="885" y="104">Card charges</text>
+
+            <!-- ── EDGE ROW  y=176..264  cx=465 ── -->
+            <rect class="diagram-box app" x="365" y="176" width="200" height="88" rx="8"></rect>
+            <text class="diagram-title" x="392" y="210">client</text>
+            <text class="diagram-subtitle" x="392" y="232">Next.js app</text>
+            <text class="diagram-subtitle" x="392" y="250">/api and /auth rewrites</text>
+
+            <!-- ── SERVICES ROW  y=306..398 ── -->
+            <!-- auth cx=155 -->
+            <rect class="diagram-box app" x="90" y="306" width="130" height="92" rx="8"></rect>
+            <text class="diagram-title" x="110" y="338">auth</text>
+            <text class="diagram-subtitle" x="110" y="360">Sessions and JWT</text>
+            <text class="diagram-subtitle" x="110" y="378">Auth0 boundary</text>
+
+            <!-- tickets cx=310 -->
+            <rect class="diagram-box app" x="245" y="306" width="130" height="92" rx="8"></rect>
+            <text class="diagram-title" x="265" y="338">tickets</text>
+            <text class="diagram-subtitle" x="265" y="360">Listings</text>
+            <text class="diagram-subtitle" x="265" y="378">Ticket events</text>
+
+            <!-- orders cx=465 -->
+            <rect class="diagram-box app" x="400" y="306" width="130" height="92" rx="8"></rect>
+            <text class="diagram-title" x="420" y="338">orders</text>
+            <text class="diagram-subtitle" x="420" y="360">Reservations</text>
+            <text class="diagram-subtitle" x="420" y="378">Order lifecycle</text>
+
+            <!-- payment cx=620 -->
+            <rect class="diagram-box app" x="555" y="306" width="130" height="92" rx="8"></rect>
+            <text class="diagram-title" x="575" y="338">payment</text>
+            <text class="diagram-subtitle" x="575" y="360">Stripe charge</text>
+            <text class="diagram-subtitle" x="575" y="378">Payment events</text>
+
+            <!-- expiration cx=775 -->
+            <rect class="diagram-box app" x="710" y="306" width="130" height="92" rx="8"></rect>
+            <text class="diagram-title" x="730" y="338">expiration</text>
+            <text class="diagram-subtitle" x="730" y="360">Delayed jobs</text>
+            <text class="diagram-subtitle" x="730" y="378">Order expiry</text>
+
+            <!-- images cx=930 -->
+            <rect class="diagram-box app" x="865" y="306" width="130" height="92" rx="8"></rect>
+            <text class="diagram-title" x="885" y="338">images</text>
+            <text class="diagram-subtitle" x="885" y="360">Media metadata</text>
+            <text class="diagram-subtitle" x="885" y="378">Image events</text>
+
+            <!-- ── EVENT TOPICS ROW  y=460..514 ── -->
+            <!-- ticket:created  cx=155 -->
+            <rect class="diagram-box event" x="90" y="460" width="130" height="54" rx="8"></rect>
+            <text class="diagram-topic-title" x="110" y="484">ticket:created</text>
+            <text class="diagram-topic-subtitle" x="110" y="502">listing opened</text>
+
+            <!-- ticket:updated  cx=310 -->
+            <rect class="diagram-box event" x="245" y="460" width="130" height="54" rx="8"></rect>
+            <text class="diagram-topic-title" x="265" y="484">ticket:updated</text>
+            <text class="diagram-topic-subtitle" x="265" y="502">listing changed</text>
+
+            <!-- order:created  cx=465 -->
+            <rect class="diagram-box event" x="400" y="460" width="130" height="54" rx="8"></rect>
+            <text class="diagram-topic-title" x="420" y="484">order:created</text>
+            <text class="diagram-topic-subtitle" x="420" y="502">reservation</text>
+
+            <!-- order:cancelled  cx=620 -->
+            <rect class="diagram-box event" x="555" y="460" width="130" height="54" rx="8"></rect>
+            <text class="diagram-topic-title" x="575" y="484">order:cancelled</text>
+            <text class="diagram-topic-subtitle" x="575" y="502">reservation closed</text>
+
+            <!-- payment:created  cx=775 -->
+            <rect class="diagram-box event" x="710" y="460" width="130" height="54" rx="8"></rect>
+            <text class="diagram-topic-title" x="730" y="484">payment:created</text>
+            <text class="diagram-topic-subtitle" x="730" y="502">charge accepted</text>
+
+            <!-- expiration:done  cx=930 (two lines so box slightly taller) -->
+            <rect class="diagram-box event" x="865" y="460" width="130" height="54" rx="8"></rect>
+            <text class="diagram-topic-title" x="885" y="484">expiration:done</text>
+            <text class="diagram-topic-subtitle" x="885" y="502">payment window</text>
+
+            <!-- ── BROKER / QUEUE ROW  y=630..704 ── -->
+            <!-- NATS  cx=465 -->
+            <rect class="diagram-box event" x="370" y="630" width="190" height="74" rx="8"></rect>
+            <text class="diagram-title" x="397" y="666">NATS Streaming</text>
+            <text class="diagram-subtitle" x="397" y="688">Current broker</text>
+
+            <!-- Redis  cx=775 -->
+            <rect class="diagram-box event" x="710" y="630" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="730" y="666">Redis</text>
+            <text class="diagram-subtitle" x="730" y="688">Expiration queue</text>
+
+            <!-- ── DATA STORES ROW  y=780..854 ── -->
+            <!-- auth Mongo  cx=155 -->
+            <rect class="diagram-box data" x="90" y="780" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="110" y="812">auth Mongo</text>
+            <text class="diagram-subtitle" x="110" y="832">User records</text>
+
+            <!-- tickets Mongo  cx=310 -->
+            <rect class="diagram-box data" x="245" y="780" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="265" y="812">tickets Mongo</text>
+            <text class="diagram-subtitle" x="265" y="832">Ticket listings</text>
+
+            <!-- orders Mongo  cx=465 -->
+            <rect class="diagram-box data" x="400" y="780" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="420" y="812">orders Mongo</text>
+            <text class="diagram-subtitle" x="420" y="832">Order state</text>
+
+            <!-- payment Mongo  cx=620 -->
+            <rect class="diagram-box data" x="555" y="780" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="575" y="812">payment Mongo</text>
+            <text class="diagram-subtitle" x="575" y="832">Charges</text>
+
+            <!-- images Mongo  cx=930 -->
+            <rect class="diagram-box data" x="865" y="780" width="130" height="74" rx="8"></rect>
+            <text class="diagram-title" x="885" y="812">images Mongo</text>
+            <text class="diagram-subtitle" x="885" y="832">Media metadata</text>
+
+            <!-- ═══════════════ ARROWS ═══════════════ -->
+
+            <!-- Browser → client (horizontal, then down) -->
+            <path class="diagram-arrow" d="M 220 89 H 365 V 176"></path>
+
+            <!-- client → services (fan out from bottom of client cx=465) -->
+            <!-- client → auth -->
+            <path class="diagram-arrow" d="M 430 264 V 284 H 155 V 306"></path>
+            <!-- client → tickets -->
+            <path class="diagram-arrow" d="M 445 264 V 284 H 310 V 306"></path>
+            <!-- client → orders -->
+            <path class="diagram-arrow" d="M 465 264 V 306"></path>
+            <!-- client → payment -->
+            <path class="diagram-arrow" d="M 485 264 V 284 H 620 V 306"></path>
+            <!-- client → images -->
+            <path class="diagram-arrow" d="M 500 264 V 284 H 930 V 306"></path>
+
+            <!-- auth → Auth0 (right to external) -->
+            <path class="diagram-arrow" d="M 220 340 H 710"></path>
+
+            <!-- payment → Stripe (orange) -->
+            <path class="diagram-arrow payment-flow" d="M 685 340 H 710 V 89 H 865"></path>
+
+            <!-- ── SERVICE → TOPIC (publish, event-flow dashes) ── -->
+            <!-- tickets → ticket:created -->
+            <path class="diagram-arrow event-flow" d="M 310 398 V 430 H 155 V 460"></path>
+            <!-- tickets → ticket:updated -->
+            <path class="diagram-arrow event-flow" d="M 310 398 V 460"></path>
+            <!-- orders → order:created -->
+            <path class="diagram-arrow event-flow" d="M 465 398 V 460"></path>
+            <!-- orders → order:cancelled -->
+            <path class="diagram-arrow event-flow" d="M 465 398 V 430 H 620 V 460"></path>
+            <!-- payment → payment:created -->
+            <path class="diagram-arrow event-flow" d="M 620 398 V 430 H 775 V 460"></path>
+            <!-- expiration → expiration:done -->
+            <path class="diagram-arrow event-flow" d="M 775 398 V 430 H 930 V 460"></path>
+            <!-- images → (no dedicated topic shown; connects to NATS) -->
+
+            <!-- ── TOPIC → NATS (all topics feed into NATS broker) ── -->
+            <path class="diagram-arrow event-flow" d="M 155 514 V 580 H 465 V 630"></path>
+            <path class="diagram-arrow event-flow" d="M 310 514 V 580 H 465 V 630"></path>
+            <path class="diagram-arrow event-flow" d="M 465 514 V 630"></path>
+            <path class="diagram-arrow event-flow" d="M 620 514 V 580 H 465 V 630"></path>
+            <path class="diagram-arrow event-flow" d="M 775 514 V 580 H 465 V 630"></path>
+            <path class="diagram-arrow event-flow" d="M 930 514 V 580 H 465 V 630"></path>
+
+            <!-- ── NATS → subscribing services (NATS fans back up) ── -->
+            <!-- NATS → tickets (ticket:created/updated) -->
+            <path class="diagram-arrow event-flow" d="M 420 630 V 610 H 310 V 398"></path>
+            <!-- NATS → orders (ticket/payment/expiration events) -->
+            <path class="diagram-arrow event-flow" d="M 450 630 V 600 H 465 V 398"></path>
+            <!-- NATS → payment (order:created/cancelled) -->
+            <path class="diagram-arrow event-flow" d="M 490 630 V 610 H 620 V 398"></path>
+            <!-- NATS → expiration (order:created) -->
+            <path class="diagram-arrow event-flow" d="M 510 630 V 620 H 775 V 398"></path>
+
+            <!-- expiration → Redis -->
+            <path class="diagram-arrow data-flow" d="M 775 630 V 704"></path>
+
+            <!-- ── SERVICE → DATA STORE (green downward) ── -->
+            <!-- auth → auth Mongo (routed left of services to avoid crossing) -->
+            <path class="diagram-arrow data-flow" d="M 155 398 V 780"></path>
+            <!-- tickets → tickets Mongo -->
+            <path class="diagram-arrow data-flow" d="M 310 398 V 780"></path>
+            <!-- orders → orders Mongo -->
+            <path class="diagram-arrow data-flow" d="M 465 398 V 780"></path>
+            <!-- payment → payment Mongo -->
+            <path class="diagram-arrow data-flow" d="M 620 398 V 780"></path>
+            <!-- images → images Mongo -->
+            <path class="diagram-arrow data-flow" d="M 930 398 V 780"></path>
+          </svg>
+          <p class="diagram-caption">
+            Solid arrows show synchronous HTTP/API calls. Purple dashed arrows show event flow
+            through the topic layer and current NATS broker. Green arrows show service-owned persistence.
+          </p>
+        </div>
+
+        <div class="tier">
+          <div class="tier-label">Users and External Systems</div>
+          <div class="nodes">
+            <div class="node external">
+              <h3>Browser</h3>
+              <p>Accesses the Next.js client through local port-forwarding or service exposure.</p>
+            </div>
+            <div class="node external">
+              <h3>Auth0</h3>
+              <p>Optional hosted identity provider for login, callback, and logout flows.</p>
+            </div>
+            <div class="node external">
+              <h3>Stripe</h3>
+              <p>Receives payment charges from the payment service using a server secret key.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-label">Edge and Client</div>
+          <div class="nodes">
+            <div class="node app">
+              <h3>client</h3>
+              <p>Next.js UI. Rewrites <code>/api/*</code> and <code>/auth/*</code> to internal services.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-label">Application Services</div>
+          <div class="nodes">
+            <div class="node app">
+              <h3>auth</h3>
+              <p>Local auth, Auth0 boundary, internal JWT session cookie, current user endpoint.</p>
+            </div>
+            <div class="node app">
+              <h3>tickets</h3>
+              <p>Ticket listing, creation, update, image URL ownership, ticket events.</p>
+            </div>
+            <div class="node app">
+              <h3>orders</h3>
+              <p>Order reservation lifecycle, authorization, cancellation, payment completion.</p>
+            </div>
+            <div class="node app">
+              <h3>payment</h3>
+              <p>Order replica validation, Stripe charge creation, payment created events.</p>
+            </div>
+            <div class="node app">
+              <h3>expiration</h3>
+              <p>Schedules order expiration jobs and emits expiration events after reservation delay.</p>
+            </div>
+            <div class="node app">
+              <h3>image-management</h3>
+              <p>Image publishing workflow and image metadata events for ticket media.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tier">
+          <div class="tier-label">Messaging and Data</div>
+          <div class="nodes">
+            <div class="node event">
+              <h3>Kafka event topics</h3>
+              <p>Individual topic boxes for ticket, order, payment, expiration, and image events.</p>
+            </div>
+            <div class="node event">
+              <h3>NATS Streaming</h3>
+              <p>Event backbone for ticket, order, payment, expiration, and image events.</p>
+            </div>
+            <div class="node event">
+              <h3>Redis</h3>
+              <p>Backing store for delayed expiration jobs.</p>
+            </div>
+            <div class="node data">
+              <h3>MongoDB per Service</h3>
+              <p>Auth, tickets, orders, payment, and image-management each use their own database.</p>
+            </div>
+            <div class="node data">
+              <h3>Persistent Volumes</h3>
+              <p>Static PV/PVC manifests persist MongoDB data and uploaded client assets locally.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i class="swatch app"></i>Application workload</span>
+        <span><i class="swatch event"></i>Messaging or queueing</span>
+        <span><i class="swatch data"></i>Storage</span>
+        <span><i class="swatch external"></i>External system</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Flows</p>
+          <h2>Primary Request and Event Paths</h2>
+        </div>
+      </div>
+
+      <div class="flow-grid">
+        <div class="flow-card">
+          <h3>Auth0 Login</h3>
+          <ol>
+            <li>Browser opens <code>/auth/login</code> through the client.</li>
+            <li>Next.js rewrites the request to <code>auth-srv</code>.</li>
+            <li>The auth service redirects to Auth0 and receives <code>/auth/callback</code>.</li>
+            <li>Auth issues the existing internal session cookie signed with <code>JWT_KEY</code>.</li>
+            <li>Backend services continue to trust the internal JWT, not raw Auth0 tokens.</li>
+          </ol>
+        </div>
+
+        <div class="flow-card">
+          <h3>Create and Reserve Ticket</h3>
+          <ol>
+            <li>Authenticated user creates a ticket through the client.</li>
+            <li>Tickets service stores the listing and publishes ticket events.</li>
+            <li>Buyer creates an order from a ticket.</li>
+            <li>Orders service reserves the ticket and publishes <code>order:created</code>.</li>
+            <li>Expiration and payment services receive their order replicas from the event stream.</li>
+          </ol>
+        </div>
+
+        <div class="flow-card">
+          <h3>Payment</h3>
+          <ol>
+            <li>Client loads Stripe Checkout with <code>NEXT_PUBLIC_STRIPE_PUB_KEY</code>.</li>
+            <li>Stripe returns a one-time token to the browser.</li>
+            <li>Client posts token and order id to <code>/api/payment</code>.</li>
+            <li>Payment service validates the order replica and charges Stripe with <code>STRIPE_KEY</code>.</li>
+            <li>Payment service publishes <code>payment:created</code>; orders marks the order complete.</li>
+          </ol>
+        </div>
+
+        <div class="flow-card">
+          <h3>Expiration</h3>
+          <ol>
+            <li>Expiration service receives <code>order:created</code>.</li>
+            <li>A delayed Redis-backed job is scheduled until the order deadline.</li>
+            <li>When the job runs, expiration publishes <code>expiration:complete</code>.</li>
+            <li>Orders cancels unpaid reservations and publishes <code>order:cancelled</code>.</li>
+            <li>Tickets and payment services update their replicas from cancellation events.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Deployments</p>
+          <h2>Service Ownership Matrix</h2>
+        </div>
+      </div>
+
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Public Routes</th>
+            <th>Storage</th>
+            <th>Events</th>
+            <th>Secrets</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>client</strong></td>
+            <td><code>/</code>, <code>/auth/*</code>, <code>/api/*</code> rewrites</td>
+            <td>Upload PVC mounted at <code>/app/public/uploads</code></td>
+            <td>None</td>
+            <td><code>NEXT_PUBLIC_STRIPE_PUB_KEY</code></td>
+          </tr>
+          <tr>
+            <td><strong>auth</strong></td>
+            <td><code>/api/users/*</code>, <code>/auth/login</code>, <code>/auth/callback</code>, <code>/auth/logout</code></td>
+            <td><code>auth-mongo-srv</code></td>
+            <td>None</td>
+            <td><code>JWT_KEY</code>, <code>auth0-secret-ticketing</code></td>
+          </tr>
+          <tr>
+            <td><strong>tickets</strong></td>
+            <td><code>/api/tickets/*</code></td>
+            <td><code>tickets-mongo-srv</code></td>
+            <td>Publishes ticket created/updated</td>
+            <td><code>JWT_KEY</code></td>
+          </tr>
+          <tr>
+            <td><strong>orders</strong></td>
+            <td><code>/api/orders/*</code></td>
+            <td><code>orders-mongo-srv</code></td>
+            <td>Publishes order created/cancelled; listens to ticket/payment/expiration events</td>
+            <td><code>JWT_KEY</code></td>
+          </tr>
+          <tr>
+            <td><strong>payment</strong></td>
+            <td><code>/api/payment</code></td>
+            <td><code>payment-mongo-srv</code></td>
+            <td>Publishes payment created; listens to order created/cancelled</td>
+            <td><code>JWT_KEY</code>, <code>STRIPE_KEY</code></td>
+          </tr>
+          <tr>
+            <td><strong>expiration</strong></td>
+            <td>Internal worker</td>
+            <td><code>expiration-redis-srv</code></td>
+            <td>Publishes expiration complete; listens to order created</td>
+            <td>None required by current manifests</td>
+          </tr>
+          <tr>
+            <td><strong>image-management</strong></td>
+            <td><code>/api/images/*</code></td>
+            <td><code>image-management-mongo-srv</code></td>
+            <td>Publishes image events</td>
+            <td><code>JWT_KEY</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Operations</p>
+          <h2>Local Development and Secret Notes</h2>
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Development Loop</h3>
+          <ul>
+            <li>Tilt is the preferred local workflow.</li>
+            <li>The client is commonly forwarded to <code>localhost:13100</code>.</li>
+            <li>Playwright validates client UI routes across desktop, tablet, and mobile.</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Required Secrets</h3>
+          <ul>
+            <li><code>jwt-secret</code> with <code>JWT_KEY</code>.</li>
+            <li><code>stripe-secret</code> with matching <code>STRIPE_KEY</code> and <code>NEXT_PUBLIC_STRIPE_PUB_KEY</code>.</li>
+            <li><code>auth0-secret-ticketing</code> when Auth0 login is enabled.</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Stripe Key Rule</h3>
+          <ul>
+            <li>The publishable key creates browser tokens.</li>
+            <li>The secret key charges those tokens on the server.</li>
+            <li>Both keys must come from the same Stripe account and mode.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
