@@ -16,10 +16,10 @@ export default ({ url, method, body, onSuccess }) => {
       return response.data;
     } catch (err) {
       setErrors(
-        <div className="alert alert-danger">
-          <h4>Ooops....</h4>
-          <ul className="my-0">
-            {err.response.data.errors.map(err => (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <h4 className="font-semibold">Something went wrong</h4>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {(err.response?.data?.errors || [{ message: 'Please try again.' }]).map(err => (
               <li key={err.message}>{err.message}</li>
             ))}
           </ul>

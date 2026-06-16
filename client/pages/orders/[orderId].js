@@ -10,11 +10,11 @@ const OrderShow = ({ order, currentUser }) => {
     url: '/api/payment',
     method: 'post',
     body: {
-      orderId: order?.id
+      orderId: order?.id,
     },
     onSuccess: (payment) => {
       Router.push('/orders');
-    }
+    },
   });
 
   useEffect(() => {
@@ -47,20 +47,52 @@ const OrderShow = ({ order, currentUser }) => {
     );
   }
   if (timeLeft < 0) {
-    return <div>Order Expired</div>;
+    return (
+      <section className="page-panel p-6">
+        <p className="text-sm font-medium uppercase tracking-wide text-brand">Order</p>
+        <h1 className="mt-2 text-2xl font-semibold text-ink">Order expired</h1>
+        <p className="mt-3 text-sm text-muted">
+          This reservation has expired. Return to the marketplace to choose another ticket.
+        </p>
+      </section>
+    );
   }
 
   return (
-    <div>
-      Time left to pay: {timeLeft} seconds
-      <StripeCheckout
-        token={({ id }) => doRequest({ token: id })}
-        stripeKey='pk_test_51PKzfgP3zyoINj4w3m7CzP4DMK1J0CIEFGvY4oeqEJ4RE6XakKfmOu13RR7MTPEHFndcmkdtyyNDqcBspIfO0niF00C8E3NpgD'
-        amount={order.ticket.price * 100}
-        email={currentUser?.email || ''}
-      />
-      {errors}
-    </div>
+    <section className="page-panel overflow-hidden">
+      <div className="grid gap-0 lg:grid-cols-[1fr_0.8fr]">
+        <div className="border-b border-line p-6 lg:border-b-0 lg:border-r">
+          <p className="text-sm font-medium uppercase tracking-wide text-brand">Checkout</p>
+          <h1 className="mt-2 text-3xl font-semibold text-ink">{order.ticket.title}</h1>
+          <p className="mt-4 text-sm text-muted">Reservation price</p>
+          <p className="mt-1 text-4xl font-semibold text-ink">${order.ticket.price.toFixed(2)}</p>
+        </div>
+
+        <div className="bg-slate-50 p-6">
+          <div className="rounded-md border border-line bg-white p-5">
+            <p className="text-sm font-medium text-muted">Time left to pay</p>
+            <p className="mt-2 text-3xl font-semibold text-ink">{timeLeft} seconds</p>
+            <p className="mt-3 text-sm text-muted">
+              Complete payment before the reservation expires.
+            </p>
+
+            <div className="mt-6">
+              <StripeCheckout
+                token={({ id }) => doRequest({ token: id })}
+                stripeKey="pk_test_51PKzfgP3zyoINj4w3m7CzP4DMK1J0CIEFGvY4oeqEJ4RE6XakKfmOu13RR7MTPEHFndcmkdtyyNDqcBspIfO0niF00C8E3NpgD"
+                amount={order.ticket.price * 100}
+                email={currentUser?.email || ''}
+                label="Pay with card"
+                panelLabel="Pay"
+                className="btn-primary w-full"
+              />
+            </div>
+
+            {errors && <div className="mt-5">{errors}</div>}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 

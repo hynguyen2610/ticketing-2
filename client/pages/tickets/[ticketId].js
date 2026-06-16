@@ -2,6 +2,7 @@ import Router from 'next/router';
 import useRequest from '../../hooks/use-request';
 
 const TicketShow = ({ ticket }) => {
+  const images = ticket?.images || [];
   const { doRequest, errors } = useRequest({
     url: '/api/orders',
     method: 'post',
@@ -30,27 +31,46 @@ const TicketShow = ({ ticket }) => {
   }
 
   return (
-    <div className="container mt-5">
-      <h3>{ticket.title}</h3>
-      <h6 className="text-muted">Price: ${ticket.price.toFixed(2)}</h6>
-      <button className="btn btn-primary" onClick={onClick}>
-        Purchase
-      </button>
-
-      <div className="row mt-4">
-        {ticket.images.map((image, index) => (
-          <div className="col-md-4 mb-4" key={image}>
-            <img
-              src={image.startsWith('https://') ? image : `/uploads/${image}`}
-              className="img-fluid"
-              alt={`Ticket Image ${index + 1}`}
-            />
+    <section className="space-y-6">
+      <div className="page-panel overflow-hidden">
+        <div className="grid gap-0 lg:grid-cols-[1.25fr_0.75fr]">
+          <div className="border-b border-line bg-slate-50 p-4 lg:border-b-0 lg:border-r">
+            {images.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {images.map((image, index) => (
+                  <img
+                    key={image}
+                    src={image.startsWith('https://') ? image : `/uploads/${image}`}
+                    className="aspect-[4/3] w-full rounded-md border border-line bg-white object-cover"
+                    alt={`Ticket Image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex min-h-64 items-center justify-center rounded-md border border-dashed border-line bg-white px-6 text-center">
+                <div>
+                  <p className="text-sm font-medium text-ink">No ticket images</p>
+                  <p className="mt-2 text-sm text-muted">Images added by the seller will appear here.</p>
+                </div>
+              </div>
+            )}
           </div>
-        ))}
-      </div>
 
-      {errors && <div className="alert alert-danger mt-3">{errors}</div>}
-    </div>
+          <div className="p-6">
+            <p className="text-sm font-medium uppercase tracking-wide text-brand">Ticket</p>
+            <h1 className="mt-2 text-3xl font-semibold text-ink">{ticket.title}</h1>
+            <p className="mt-4 text-sm text-muted">Current listing price</p>
+            <p className="mt-1 text-4xl font-semibold text-ink">${ticket.price.toFixed(2)}</p>
+
+            <button className="btn-primary mt-6 w-full sm:w-auto" onClick={onClick}>
+              Purchase ticket
+            </button>
+
+            {errors && <div className="mt-5">{errors}</div>}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 
