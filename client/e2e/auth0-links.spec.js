@@ -17,6 +17,20 @@ test.describe('Auth0 entry links', () => {
     await expect(auth0Link).toHaveAttribute('href', '/auth/login?screen_hint=signup');
   });
 
+  test('sign-out page redirects through the auth service logout route', async ({ page }) => {
+    await page.route('**/auth/logout', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/plain',
+        body: 'Auth logout route reached',
+      });
+    });
+
+    await page.goto('/auth/signout');
+    await page.waitForURL(/\/auth\/logout$/);
+    await expect(page.getByText('Auth logout route reached')).toBeVisible();
+  });
+
   test('Auth0 entry route responds predictably', async ({ request }) => {
     test.skip(!process.env.E2E_CHECK_AUTH_ROUTE, 'Enable with E2E_CHECK_AUTH_ROUTE=1 when auth service routing is available.');
 

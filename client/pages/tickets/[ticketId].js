@@ -6,7 +6,7 @@ const TicketShow = ({ ticket }) => {
     url: '/api/orders',
     method: 'post',
     body: {
-      ticketId: ticket.id,
+      ticketId: ticket?.id,
     },
     onSuccess: (order) => {
       Router.push('/orders/[orderId]', `/orders/${order.id}`);
@@ -16,6 +16,18 @@ const TicketShow = ({ ticket }) => {
   const onClick = () => {
     doRequest();
   };
+
+  if (!ticket) {
+    return (
+      <section className="page-panel p-6">
+        <p className="text-sm font-medium uppercase tracking-wide text-brand">Ticket</p>
+        <h1 className="mt-2 text-2xl font-semibold text-ink">Ticket unavailable</h1>
+        <p className="mt-3 text-sm text-muted">
+          This ticket could not be loaded. It may have been removed or the ticket service may be unavailable.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <div className="container mt-5">
@@ -44,9 +56,13 @@ const TicketShow = ({ ticket }) => {
 
 TicketShow.getInitialProps = async (context, client) => {
   const { ticketId } = context.query;
-  const { data } = await client.get(`/api/tickets/${ticketId}`);
+  try {
+    const { data } = await client.get(`/api/tickets/${ticketId}`);
 
-  return { ticket: data };
+    return { ticket: data };
+  } catch (err) {
+    return { ticket: null };
+  }
 };
 
 export default TicketShow;

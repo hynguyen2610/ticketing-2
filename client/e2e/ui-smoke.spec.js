@@ -10,6 +10,9 @@ const publicRoutes = [
     heading: /sign in to ticket system|create a ticket/i,
     expectedPath: /\/auth\/signin|\/tickets\/new/,
   },
+  { path: '/tickets/playwright-missing-ticket', heading: /ticket unavailable/i },
+  { path: '/orders', heading: /my orders history/i },
+  { path: '/orders/playwright-missing-order', heading: /order unavailable/i },
 ];
 
 const importantResourceTypes = new Set(['document', 'script', 'stylesheet', 'image', 'font']);
