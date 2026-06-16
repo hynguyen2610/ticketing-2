@@ -49,6 +49,7 @@ const getAuth0Client = async () => {
   auth0Client = new issuer.Client({
     client_id: AUTH0_CLIENT_ID,
     client_secret: AUTH0_CLIENT_SECRET,
+    token_endpoint_auth_method: 'client_secret_post',
   });
   auth0ClientConfigKey = configKey;
 

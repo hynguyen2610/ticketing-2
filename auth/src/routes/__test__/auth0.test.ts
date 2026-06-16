@@ -84,6 +84,7 @@ it('redirects to Auth0 and stores PKCE state in the session', async () => {
   expect(mockClientConstructor).toHaveBeenCalledWith({
     client_id: 'auth0-client-id',
     client_secret: 'auth0-client-secret',
+    token_endpoint_auth_method: 'client_secret_post',
   });
   expect(mockAuthorizationUrl).toHaveBeenCalledWith({
     scope: 'openid profile email',
