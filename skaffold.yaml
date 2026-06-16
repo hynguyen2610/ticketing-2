@@ -31,6 +31,12 @@ build:
         manual:
           - src: '**/*.js'
             dest: .
+          - src: '**/*.css'
+            dest: .
+          - src: 'tailwind.config.js'
+            dest: .
+          - src: 'postcss.config.js'
+            dest: .
     - image: bluestorm1288/ticketing-tickets
       context: tickets
       docker:
@@ -78,6 +84,10 @@ build:
       sync:
         manual:
           - src: 'src/**/*.js'
+            dest: .
+          - src: 'src/**/*.css'
+            dest: .
+          - src: 'public/**/*'
             dest: .
 profiles:
   - name: cluster-registry
