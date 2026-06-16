@@ -6,9 +6,24 @@ Add Playwright coverage that checks the ticketing UI is reachable, stable, and v
 
 The first version should catch broken routes, client-side crashes, failed assets, obvious layout issues, and Auth0 link regressions while keeping the test setup simple enough to run during local development.
 
+## Implementation Status
+
+- Playwright test runner added to the client.
+- Local UI smoke suite added for public pages across desktop, tablet, and mobile viewports.
+- Auth0 link checks added.
+- Live `/auth/login` route validation added as an opt-in check with `E2E_CHECK_AUTH_ROUTE=1`.
+- Playwright starts a local Next dev server by default on `http://127.0.0.1:13110`.
+- Tilt validation remains available through `E2E_BASE_URL` or `npm run test:e2e:tilt`.
+
 ## Target Runtime
 
-Run tests against the local Tilt client:
+By default, tests run against a local Next dev server started by Playwright:
+
+```sh
+http://127.0.0.1:13110
+```
+
+Tests can also run against the local Tilt client:
 
 ```sh
 http://127.0.0.1:13100
@@ -133,6 +148,7 @@ From `client/package.json`:
 {
   "scripts": {
     "test:e2e": "playwright test",
+    "test:e2e:tilt": "E2E_BASE_URL=http://127.0.0.1:13100 playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report"
   }
@@ -141,17 +157,24 @@ From `client/package.json`:
 
 ## Local Run Flow
 
-Start Tilt:
+Run UI checks against the local Next server:
+
+```sh
+cd client
+npm run test:e2e
+```
+
+To run through Tilt, start Tilt:
 
 ```sh
 scripts/dev-tilt.sh
 ```
 
-Run UI checks:
+Then run:
 
 ```sh
 cd client
-E2E_BASE_URL=http://127.0.0.1:13100 npm run test:e2e
+npm run test:e2e:tilt
 ```
 
 If the client port was overridden:

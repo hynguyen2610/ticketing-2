@@ -46,6 +46,8 @@ ehthumbs.db
 
 # Jest test coverage
 coverage/
+client/playwright-report/
+client/test-results/
 
 common/
 **/.DS_Store

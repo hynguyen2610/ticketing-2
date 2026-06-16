@@ -247,6 +247,36 @@ If Docker rejects the push because the registry uses HTTP, add
 `NODE_IP:30500` to Docker's insecure registries and restart Docker before
 running Skaffold again.
 
+## Run UI validation
+
+The client has Playwright smoke tests for public routes, Auth0 entry links, and
+basic responsive layout health. By default, Playwright starts a local Next dev
+server on `http://127.0.0.1:13110`.
+
+Run the local UI smoke suite:
+
+```sh
+cd client
+npm run test:e2e
+```
+
+To validate the client through Tilt, start Tilt and run:
+
+```sh
+cd client
+npm run test:e2e:tilt
+```
+
+If Tilt is forwarding the client on another port:
+
+```sh
+cd client
+E2E_BASE_URL=http://127.0.0.1:13101 npm run test:e2e
+```
+
+Failure screenshots, traces, and reports are written under
+`client/test-results` and `client/playwright-report`.
+
 To build using Docker on the Linux cluster machine over SSH, point the Docker
 client at that machine and use the `cluster-docker` profile:
 

@@ -5,6 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "next",
+    "test:e2e": "playwright test",
+    "test:e2e:tilt": "E2E_BASE_URL=http://127.0.0.1:13100 playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report",
     "test:auth0-links": "node test/auth0-links.test.js",
     "test:build-client": "node test/build-client.test.js"
   },
@@ -22,6 +26,7 @@
     "react-stripe-checkout": "^2.6.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "autoprefixer": "^10.5.0",
     "postcss": "^8.5.15",
     "tailwindcss": "^3.4.17"
