@@ -22,7 +22,9 @@ Optional Auth0 integration can be enabled by setting Auth0 environment variables
 
 For clusters, the auth deployment reads these values from a secret named `auth0-secret`. Create that secret manually before deploying the auth service.
 
-Use `infra/k8s-apps/auth0-secret.example.yaml` as a safe placeholder template, then create the real secret manually from the cluster or with `kubectl create secret generic`.
+Use `infra/examples/auth0-secret.example.yaml` as a safe placeholder template,
+then create the real secret manually from the cluster or with
+`kubectl create secret generic`.
 
 Example command:
 ```sh
@@ -86,9 +88,9 @@ scripts/check-auth0-secret.sh --login-route
 > Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
 >
 > If you prefer a local manifest while developing, copy
-> `infra/k8s-apps/auth0-secret.example.yaml` to
-> `infra/k8s-apps/auth0-secret.yaml`, replace the placeholder values, and apply
-> that ignored file with `kubectl apply -f infra/k8s-apps/auth0-secret.yaml`.
+> `infra/examples/auth0-secret.example.yaml` to
+> `infra/secret/auth0-secret.yaml`, replace the placeholder values, and apply
+> that ignored file with `kubectl apply -f infra/secret/auth0-secret.yaml`.
 
 The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
 

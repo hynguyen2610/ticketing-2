@@ -47,7 +47,7 @@ system.
   `/auth/logout` to the auth service using Kubernetes service env addresses
   when available, with `auth-srv` as the local fallback.
 - [x] `infra/k8s-apps/auth-depl.yaml` reads Auth0 values from `auth0-secret`.
-- [x] `infra/k8s-apps/auth0-secret.example.yaml` exists as a placeholder
+- [x] `infra/examples/auth0-secret.example.yaml` exists as a placeholder
   template.
 - [x] `README.md` documents the Auth0 secret values and local workflow.
 
@@ -100,7 +100,8 @@ system.
 ## 3. Environment And Secrets
 
 - [x] Add Auth0 secret references to `infra/k8s-apps/auth-depl.yaml`.
-- [x] Add `infra/k8s-apps/auth0-secret.example.yaml` as a safe placeholder.
+- [x] Add `infra/examples/auth0-secret.example.yaml` as a safe placeholder
+  outside the Skaffold-applied manifest glob.
 - [x] Make `AUTH0_AUDIENCE` optional in Kubernetes because it is only needed
   when an Auth0 API audience is configured.
 - [x] Add a safe script to verify the live Auth0 secret and auth pod
@@ -131,7 +132,7 @@ system.
 - [x] Confirm `JWT_KEY` still exists because the auth service still issues the
   internal JWT cookie after Auth0 login.
 - [x] Decide how to manage local developer secrets outside source control.
-- [x] Do not commit a real `infra/k8s-apps/auth0-secret.yaml`.
+- [x] Do not commit a real `infra/secret/auth0-secret.yaml`.
 
 ## 4. Client App Integration
 
