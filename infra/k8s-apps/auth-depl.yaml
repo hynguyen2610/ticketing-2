@@ -26,32 +26,32 @@ spec:
             - name: AUTH0_DOMAIN
               valueFrom:
                 secretKeyRef:
-                  name: auth0-secret
+                  name: auth0-secret-ticketing
                   key: AUTH0_DOMAIN
             - name: AUTH0_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: auth0-secret
+                  name: auth0-secret-ticketing
                   key: AUTH0_CLIENT_ID
             - name: AUTH0_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: auth0-secret
+                  name: auth0-secret-ticketing
                   key: AUTH0_CLIENT_SECRET
             - name: AUTH0_CALLBACK_URL
               valueFrom:
                 secretKeyRef:
-                  name: auth0-secret
+                  name: auth0-secret-ticketing
                   key: AUTH0_CALLBACK_URL
             - name: AUTH0_LOGOUT_REDIRECT_URL
               valueFrom:
                 secretKeyRef:
-                  name: auth0-secret
+                  name: auth0-secret-ticketing
                   key: AUTH0_LOGOUT_REDIRECT_URL
             - name: AUTH0_AUDIENCE
               valueFrom:
                 secretKeyRef:
-                  name: auth0-secret
+                  name: auth0-secret-ticketing
                   key: AUTH0_AUDIENCE
                   optional: true
 ---

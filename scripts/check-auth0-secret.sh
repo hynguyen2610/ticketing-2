@@ -3,7 +3,7 @@ set -eu
 
 KUBECTL="${KUBECTL:-kubectl}"
 NAMESPACE="${NAMESPACE:-default}"
-SECRET_NAME="${SECRET_NAME:-auth0-secret}"
+SECRET_NAME="${SECRET_NAME:-auth0-secret-ticketing}"
 AUTH_SELECTOR="${AUTH_SELECTOR:-app=auth}"
 AUTH_SERVICE="${AUTH_SERVICE:-auth-srv}"
 LOCAL_PORT="${LOCAL_PORT:-13000}"
@@ -14,7 +14,7 @@ usage() {
 Usage: $0 [secret|--pod-env|--login-route|--all]
 
 Commands:
-  secret     Check the Kubernetes auth0-secret object (default)
+  secret     Check the Kubernetes auth0-secret-ticketing object (default)
   --pod-env  Check the running auth pod environment
   --login-route
              Check /auth/login through a temporary auth service port-forward
@@ -23,7 +23,7 @@ Commands:
 Environment variables:
   KUBECTL        Kubectl command to use (default: kubectl)
   NAMESPACE      Kubernetes namespace (default: default)
-  SECRET_NAME    Secret name for secret mode (default: auth0-secret)
+  SECRET_NAME    Secret name for secret mode (default: auth0-secret-ticketing)
   AUTH_SELECTOR  Pod selector for --pod-env mode (default: app=auth)
   AUTH_SERVICE   Auth service name for --login-route mode (default: auth-srv)
   LOCAL_PORT     Local port for --login-route mode (default: 13000)

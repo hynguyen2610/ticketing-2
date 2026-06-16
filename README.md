@@ -20,15 +20,17 @@ Optional Auth0 integration can be enabled by setting Auth0 environment variables
 - `AUTH0_LOGOUT_REDIRECT_URL`
 - `AUTH0_AUDIENCE` (optional)
 
-For clusters, the auth deployment reads these values from a secret named `auth0-secret`. Create that secret manually before deploying the auth service.
+For clusters, the auth deployment reads these values from a secret named
+`auth0-secret-ticketing`. Create that secret manually before deploying the auth
+service.
 
-Use `infra/examples/auth0-secret.example.yaml` as a safe placeholder template,
+Use `infra/examples/auth0-secret-ticketing.example.yaml` as a safe placeholder template,
 then create the real secret manually from the cluster or with
 `kubectl create secret generic`.
 
 Example command:
 ```sh
-kubectl create secret generic auth0-secret \
+kubectl create secret generic auth0-secret-ticketing \
   --from-literal=AUTH0_DOMAIN=<your-auth0-domain> \
   --from-literal=AUTH0_CLIENT_ID=<your-auth0-client-id> \
   --from-literal=AUTH0_CLIENT_SECRET=<your-auth0-client-secret> \
@@ -88,9 +90,10 @@ scripts/check-auth0-secret.sh --login-route
 > Do not commit real Auth0 secrets into source control. Create this secret manually in the cluster or via an ignored local secret management workflow.
 >
 > If you prefer a local manifest while developing, copy
-> `infra/examples/auth0-secret.example.yaml` to
-> `infra/secret/auth0-secret.yaml`, replace the placeholder values, and apply
-> that ignored file with `kubectl apply -f infra/secret/auth0-secret.yaml`.
+> `infra/examples/auth0-secret-ticketing.example.yaml` to
+> `infra/secret/auth0-secret-ticketing.yaml`, replace the placeholder values,
+> and apply that ignored file with
+> `kubectl apply -f infra/secret/auth0-secret-ticketing.yaml`.
 
 The client app now routes sign-in and sign-up through Auth0 while preserving the existing local auth fallback via the auth service.
 

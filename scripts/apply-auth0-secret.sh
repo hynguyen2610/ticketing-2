@@ -3,7 +3,7 @@ set -eu
 
 KUBECTL="${KUBECTL:-kubectl}"
 NAMESPACE="${NAMESPACE:-default}"
-SECRET_NAME="${SECRET_NAME:-auth0-secret}"
+SECRET_NAME="${SECRET_NAME:-auth0-secret-ticketing}"
 AUTH_DEPLOYMENT="${AUTH_DEPLOYMENT:-auth-depl}"
 RESTART_AUTH=false
 
@@ -31,7 +31,7 @@ Optional environment variables:
 Other environment variables:
   KUBECTL      Kubectl command to use (default: kubectl)
   NAMESPACE    Kubernetes namespace (default: default)
-  SECRET_NAME  Secret name (default: auth0-secret)
+  SECRET_NAME  Secret name (default: auth0-secret-ticketing)
   AUTH_DEPLOYMENT
               Auth deployment to restart with --restart-auth (default: auth-depl)
 EOF
@@ -107,7 +107,7 @@ if [ "$status" -ne 0 ]; then
   exit "$status"
 fi
 
-tmp_manifest="${TMPDIR:-/tmp}/auth0-secret.$$"
+tmp_manifest="${TMPDIR:-/tmp}/auth0-secret-ticketing.$$"
 
 cleanup() {
   rm -f "$tmp_manifest"

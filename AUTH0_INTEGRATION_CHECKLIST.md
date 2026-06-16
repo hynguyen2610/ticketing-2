@@ -46,8 +46,9 @@ system.
 - [x] `client/next.config.js` rewrites `/auth/login`, `/auth/callback`, and
   `/auth/logout` to the auth service using Kubernetes service env addresses
   when available, with `auth-srv` as the local fallback.
-- [x] `infra/k8s-apps/auth-depl.yaml` reads Auth0 values from `auth0-secret`.
-- [x] `infra/examples/auth0-secret.example.yaml` exists as a placeholder
+- [x] `infra/k8s-apps/auth-depl.yaml` reads Auth0 values from
+  `auth0-secret-ticketing`.
+- [x] `infra/examples/auth0-secret-ticketing.example.yaml` exists as a placeholder
   template.
 - [x] `README.md` documents the Auth0 secret values and local workflow.
 
@@ -100,7 +101,7 @@ system.
 ## 3. Environment And Secrets
 
 - [x] Add Auth0 secret references to `infra/k8s-apps/auth-depl.yaml`.
-- [x] Add `infra/examples/auth0-secret.example.yaml` as a safe placeholder
+- [x] Add `infra/examples/auth0-secret-ticketing.example.yaml` as a safe placeholder
   outside the Skaffold-applied manifest glob.
 - [x] Make `AUTH0_AUDIENCE` optional in Kubernetes because it is only needed
   when an Auth0 API audience is configured.
@@ -108,8 +109,8 @@ system.
   environment without printing secret values.
 - [x] Add a safe script to apply the live Auth0 secret from environment
   variables without writing real values into source control.
-- [x] Document the manual `kubectl create secret generic auth0-secret` command
-  in `README.md`.
+- [x] Document the manual `kubectl create secret generic
+  auth0-secret-ticketing` command in `README.md`.
 - [ ] Create the real Kubernetes secret in the target cluster:
   - `AUTH0_DOMAIN`
   - `AUTH0_CLIENT_ID`
@@ -132,7 +133,7 @@ system.
 - [x] Confirm `JWT_KEY` still exists because the auth service still issues the
   internal JWT cookie after Auth0 login.
 - [x] Decide how to manage local developer secrets outside source control.
-- [x] Do not commit a real `infra/secret/auth0-secret.yaml`.
+- [x] Do not commit a real `infra/secret/auth0-secret-ticketing.yaml`.
 
 ## 4. Client App Integration
 
@@ -179,7 +180,7 @@ system.
 
 ## 7. Deployment And Skaffold Workflow
 
-- [x] Auth deployment references `auth0-secret`.
+- [x] Auth deployment references `auth0-secret-ticketing`.
 - [x] Applied the current auth deployment manifest with optional
   `AUTH0_AUDIENCE`.
 - [x] Client deployment does not need Auth0 env vars in the current
@@ -194,8 +195,8 @@ system.
   ```sh
   cd auth && npm run test:auth0-flow
   ```
-- [ ] Verify Skaffold deploy succeeds when `auth0-secret`, `jwt-secret`, and
-  `stripe-secret` already exist.
+- [ ] Verify Skaffold deploy succeeds when `auth0-secret-ticketing`,
+  `jwt-secret`, and `stripe-secret` already exist.
   - Built and pushed the auth image with Skaffold:
     `100.114.61.78:30500/ticketing/bluestorm1288_ticketing-auth:1218c8f`.
   - Updated `auth-depl` to the rebuilt image and rollout succeeded.
