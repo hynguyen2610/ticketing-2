@@ -5,17 +5,20 @@ Need to install react-stripe-checkout
 ```
 npm install react-stripe-checkout
 ```
-Add STRIPE_PUB_KEY to k8s secret stripe-secret
+Add `NEXT_PUBLIC_STRIPE_PUB_KEY` to the same Kubernetes `stripe-secret` used by
+the payment service. The publishable key and `STRIPE_KEY` must come from the
+same Stripe account and mode.
+
 ```yaml
 apiVersion: v1
-data:
-  STRIPE_KEY: <ENCODED_STRIPE_SECRET_KEY>
-  STRIPE_PUB_KEY: <ENCODED_STRIPE_PUB_KEY>
 kind: Secret
 metadata:
   name: stripe-secret
   namespace: default
 type: Opaque
+stringData:
+  STRIPE_KEY: <your-stripe-secret-key>
+  NEXT_PUBLIC_STRIPE_PUB_KEY: <your-stripe-publishable-key>
 ```
 Stripe Checkout need prop-types to work (as dependency)
 ```

@@ -3,6 +3,8 @@ import StripeCheckout from 'react-stripe-checkout';
 import useRequest from '../../hooks/use-request';
 import Router from 'next/router';
 
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUB_KEY;
+
 const OrderShow = ({ order, currentUser }) => {
   const [timeLeft, setTimeLeft] = useState(0);
 
@@ -76,17 +78,23 @@ const OrderShow = ({ order, currentUser }) => {
               Complete payment before the reservation expires.
             </p>
 
-            <div className="mt-6">
-              <StripeCheckout
-                token={({ id }) => doRequest({ token: id })}
-                stripeKey="pk_test_51PKzfgP3zyoINj4w3m7CzP4DMK1J0CIEFGvY4oeqEJ4RE6XakKfmOu13RR7MTPEHFndcmkdtyyNDqcBspIfO0niF00C8E3NpgD"
-                amount={order.ticket.price * 100}
-                email={currentUser?.email || ''}
-                label="Pay with card"
-                panelLabel="Pay"
-                className="btn-primary w-full"
-              />
-            </div>
+            {stripePublishableKey ? (
+              <div className="mt-6">
+                <StripeCheckout
+                  token={({ id }) => doRequest({ token: id })}
+                  stripeKey={stripePublishableKey}
+                  amount={Math.round(order.ticket.price * 100)}
+                  email={currentUser?.email || ''}
+                  label="Pay with card"
+                  panelLabel="Pay"
+                  className="btn-primary w-full"
+                />
+              </div>
+            ) : (
+              <p className="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                Stripe publishable key is not configured.
+              </p>
+            )}
 
             {errors && <div className="mt-5">{errors}</div>}
           </div>

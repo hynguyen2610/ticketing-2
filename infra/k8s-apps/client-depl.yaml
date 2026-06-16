@@ -15,6 +15,12 @@ spec:
       containers:
         - name: client
           image: bluestorm1288/ticketing-client:latest
+          env:
+            - name: NEXT_PUBLIC_STRIPE_PUB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: stripe-secret
+                  key: NEXT_PUBLIC_STRIPE_PUB_KEY
           volumeMounts:
             - name: upload-storage
               mountPath: /app/public/uploads
